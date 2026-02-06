@@ -1,0 +1,773 @@
+<!--
+    Markdown 办公编辑器 v2.0
+    =======================
+    一款功能强大的 Markdown 办公编辑器，支持实时预览、多功能工具箱、莫奈风格主题
+    
+    主要功能:
+    - Markdown 实时预览和编辑
+    - 快速编辑工具栏 (支持快捷键)
+    - 多功能工具箱: 计算器、画板、时钟、待办事项、便签、颜色转换器、一言等
+    - 莫奈风格主题 (5种配色)
+    - 深色/浅色模式切换
+    - 代码高亮支持
+    - 搜索功能
+    - 自动保存
+    
+    技术栈: HTML5 + CSS3 + 原生 JavaScript
+    外部库: marked.js (Markdown解析), highlight.js (代码高亮)
+    
+    作者: iFlow CLI
+    开源协议: BSD 3-Clause
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 办公编辑器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 主容器: 三栏布局 (编辑区-预览区-功能区) -->
+    <div class="container">
+        <!-- 左侧编辑区: Markdown 输入和快速编辑工具栏 -->
+        <!-- 左侧编辑区 -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <h3>编辑区</h3>
+            </div>
+            <!-- 快速编辑工具栏: 一键插入Markdown语法 -->
+            <div class="quick-edit-toolbar">
+                <button class="quick-btn tooltip" data-action="bold" data-tooltip="粗体 (Ctrl+B)">
+                    B
+                </button>
+                <button class="quick-btn tooltip" data-action="italic" data-tooltip="斜体 (Ctrl+I)">
+                    I
+                </button>
+                <button class="quick-btn tooltip" data-action="strikethrough" data-tooltip="删除线">
+                    S
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" data-action="h1" data-tooltip="标题1">
+                    H1
+                </button>
+                <button class="quick-btn tooltip" data-action="h2" data-tooltip="标题2">
+                    H2
+                </button>
+                <button class="quick-btn tooltip" data-action="h3" data-tooltip="标题3">
+                    H3
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" data-action="ul" data-tooltip="无序列表">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="ol" data-tooltip="有序列表">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="6" x2="21" y2="6"/>
+                        <line x1="10" y1="12" x2="21" y2="12"/>
+                        <line x1="10" y1="18" x2="21" y2="18"/>
+                        <path d="M4 6h1v4"/>
+                        <path d="M4 10h2"/>
+                        <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="checkbox" data-tooltip="复选框">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" data-action="code" data-tooltip="代码 (Ctrl+K)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"/>
+                        <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="codeblock" data-tooltip="代码块">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+                        <rect x="9" y="9" width="6" height="6"/>
+                        <line x1="9" y1="1" x2="9" y2="4"/>
+                        <line x1="15" y1="1" x2="15" y2="4"/>
+                        <line x1="9" y1="20" x2="9" y2="23"/>
+                        <line x1="15" y1="20" x2="15" y2="23"/>
+                        <line x1="20" y1="9" x2="23" y2="9"/>
+                        <line x1="20" y1="14" x2="23" y2="14"/>
+                        <line x1="1" y1="9" x2="4" y2="9"/>
+                        <line x1="1" y1="14" x2="4" y2="14"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="quote" data-tooltip="引用">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="link" data-tooltip="链接 (Ctrl+L)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="image" data-tooltip="图片">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="table" data-tooltip="表格">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="21" y1="10" x2="3" y2="10"/>
+                        <line x1="21" y1="14" x2="3" y2="14"/>
+                        <line x1="10" y1="3" x2="10" y2="21"/>
+                        <line x1="14" y1="3" x2="14" y2="21"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" data-action="hr" data-tooltip="分割线">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" id="search-btn" data-tooltip="搜索 (Ctrl+F)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="clear-btn" data-tooltip="清空编辑器">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="sync-scroll-btn" data-action="sync-scroll" data-tooltip="滚动同步">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="reset-btn" data-tooltip="重置内容">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="fullscreen-btn" data-tooltip="全屏 (F11)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" id="save-progress-btn" data-tooltip="保存进度 (Ctrl+Shift+P)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="load-progress-btn" data-tooltip="恢复进度 (Ctrl+Shift+L)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-bar" id="search-bar" style="display: none;">
+                <input type="text" id="search-input" placeholder="搜索..." class="search-input">
+                <div class="search-controls">
+                    <button class="search-nav-btn" id="search-prev" title="上一个">↑</button>
+                    <span id="search-count" class="search-count">0/0</span>
+                    <button class="search-nav-btn" id="search-next" title="下一个">↓</button>
+                    <button class="search-close-btn" id="search-close" title="关闭">×</button>
+                </div>
+            </div>
+            <div class="editor-status">
+                <span id="line-col-info" class="line-col-info">行 1, 列 1</span>
+                <span class="editor-divider"></span>
+                <span id="auto-save-status" class="auto-save-status">已自动保存</span>
+                <span class="editor-actions">
+                    <button id="copy-md-btn" class="copy-md-btn" title="复制Markdown">复制Markdown</button>
+                </span>
+            </div>
+            <textarea id="editor" placeholder="# 欢迎使用 Markdown 办公编辑器 🎨
+
+这是一个功能强大的 Markdown 编辑器，支持实时预览和丰富的工具箱。
+
+## 主要功能
+
+### 📝 编辑功能
+- **实时预览**：左侧编辑，右侧实时查看渲染效果
+- **快速编辑**：使用工具栏快捷插入 Markdown 语法
+- **搜索功能**：按 Ctrl+F 快速搜索内容
+- **自动保存**：每 3 秒自动保存您的编辑内容
+
+### 🎨 主题系统
+- 5 种莫奈风格配色方案
+- 深色/浅色模式一键切换
+- 精美的动画效果
+
+### 🛠️ 多功能工具箱
+按数字键 1-9, 0 或 Q 快速切换：
+1. 计算器  - 日常计算
+2. 画板    - 自由绘图
+3. 时钟    - 世界时钟
+4. 待办    - 任务管理
+5. 便签    - 快速记录
+6. 颜色    - 颜色转换
+7. 一言    - 随机名言
+8. 单位    - 单位转换
+9. 密码    - 密码生成
+0. 分析    - 文本分析
+Q. 时间戳  - 时间戳转换
+
+### ⌨️ 快捷键
+- `Ctrl+B` - **粗体**
+- `Ctrl+I` - *斜体*
+- `Ctrl+K` - `代码`
+- `Ctrl+L` - [链接](url)
+- `Ctrl+S` - 保存为 HTML
+- `Ctrl+Shift+S` - 保存为 Markdown
+- `Ctrl+F` - 搜索
+- `F11` - 全屏模式
+
+开始编辑吧！在上方工具栏选择格式，或直接使用快捷键"></textarea>
+        </div>
+
+        <!-- 分割线1: 可拖拽调整左侧和中间面板宽度 -->
+        <!-- 分割线1 -->
+        <div class="resizer resizer-horizontal" id="resizer-1"></div>
+
+        <!-- 中间预览区 -->
+        <div class="panel center-panel">
+            <div class="panel-header">
+                <h3>预览区</h3>
+                <div class="save-buttons">
+                    <button id="import-md-btn" class="save-btn tooltip" data-tooltip="导入Markdown文件">
+                        导入MD
+                    </button>
+                    <button id="copy-preview-btn" class="save-btn tooltip" data-tooltip="复制预览内容">
+                        复制预览
+                    </button>
+                    <button id="save-html-btn" class="save-btn tooltip" data-tooltip="保存为HTML (Ctrl+S)">
+                        保存HTML <span class="keyboard-shortcut"><kbd>Ctrl</kbd>+<kbd>S</kbd></span>
+                    </button>
+                    <button id="save-md-btn" class="save-btn tooltip" data-tooltip="保存为Markdown (Ctrl+Shift+S)">
+                        保存MD <span class="keyboard-shortcut"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></span>
+                    </button>
+                    <input type="file" id="md-file-input" accept=".md,.markdown,.txt" style="display: none;">
+                </div>
+                <div class="word-count-info" id="word-count">0 字 · 0 段落</div>
+            </div>
+            <div id="preview"></div>
+        </div>
+
+        <!-- 分割线2: 可拖拽调整中间和右侧面板宽度 -->
+        <!-- 分割线2 -->
+        <div class="resizer resizer-horizontal" id="resizer-2"></div>
+
+        <!-- 右侧功能区 -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <h3>功能区</h3>
+                <div class="panel-header-actions">
+                    <button id="settings-toggle" class="settings-toggle" aria-label="打开设置" title="打开设置">
+                        <span class="settings-icon">⚙️</span>
+                    </button>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="切换深色模式" title="切换深色模式">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 工具选择器: 切换不同的工具面板 -->
+            <div class="tool-selector">
+                <button class="tool-btn active tooltip" data-tool="calculator" data-tooltip="计算器 (1)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2"/>
+                        <line x1="8" y1="6" x2="16" y2="6"/>
+                        <line x1="16" y1="14" x2="16" y2="14"/>
+                        <line x1="16" y1="18" x2="16" y2="18"/>
+                        <line x1="8" y1="10" x2="8" y2="10"/>
+                        <line x1="12" y1="10" x2="12" y2="10"/>
+                        <line x1="16" y1="10" x2="16" y2="10"/>
+                        <line x1="8" y1="14" x2="8" y2="14"/>
+                        <line x1="12" y1="14" x2="12" y2="14"/>
+                        <line x1="8" y1="18" x2="8" y2="18"/>
+                        <line x1="12" y1="18" x2="12" y2="18"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="canvas" data-tooltip="画板 (2)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                        <path d="M2 2l7.586 7.586"/>
+                        <circle cx="11" cy="11" r="2"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="clock" data-tooltip="时钟 (3)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="todo" data-tooltip="待办 (4)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="notes" data-tooltip="便签 (5)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="color" data-tooltip="颜色 (6)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                        <path d="M2 12h20"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="quote" data-tooltip="一言 (7)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="converter" data-tooltip="单位转换 (8)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/>
+                        <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.35"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="password" data-tooltip="密码生成 (9)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="text-analyzer" data-tooltip="文本分析 (0)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <line x1="10" y1="9" x2="8" y2="9"/>
+                    </svg>
+                </button>
+                <button class="tool-btn tooltip" data-tool="timestamp" data-tooltip="时间戳 (Q)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                        <path d="M16 14l-4-2"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="tool-content">
+                <!-- 计算器 -->
+                <div id="calculator" class="tool-panel active">
+                    <div class="calculator-display">
+                        <input type="text" id="calc-display" readonly value="0">
+                    </div>
+                    <div class="calculator-buttons">
+                        <button class="calc-btn" data-action="clear">C</button>
+                        <button class="calc-btn" data-action="backspace">←</button>
+                        <button class="calc-btn" data-action="percent">%</button>
+                        <button class="calc-btn operator" data-action="divide">÷</button>
+                        <button class="calc-btn" data-value="7">7</button>
+                        <button class="calc-btn" data-value="8">8</button>
+                        <button class="calc-btn" data-value="9">9</button>
+                        <button class="calc-btn operator" data-action="multiply">×</button>
+                        <button class="calc-btn" data-value="4">4</button>
+                        <button class="calc-btn" data-value="5">5</button>
+                        <button class="calc-btn" data-value="6">6</button>
+                        <button class="calc-btn operator" data-action="subtract">−</button>
+                        <button class="calc-btn" data-value="1">1</button>
+                        <button class="calc-btn" data-value="2">2</button>
+                        <button class="calc-btn" data-value="3">3</button>
+                        <button class="calc-btn operator" data-action="add">+</button>
+                        <button class="calc-btn zero" data-value="0">0</button>
+                        <button class="calc-btn" data-action="decimal">.</button>
+                        <button class="calc-btn equals" data-action="equals">=</button>
+                    </div>
+                </div>
+
+                <!-- 画板 -->
+                <div id="canvas" class="tool-panel">
+                    <div class="canvas-toolbar">
+                        <div class="color-picker">
+                            <label>颜色:</label>
+                            <input type="color" id="brush-color" value="#000000">
+                        </div>
+                        <div class="brush-size">
+                            <label>画笔大小:</label>
+                            <input type="range" id="brush-size" min="1" max="20" value="3">
+                            <span id="brush-size-value">3</span>
+                        </div>
+                        <div class="canvas-actions">
+                            <button id="clear-canvas" class="action-btn">清空</button>
+                            <button id="save-canvas" class="action-btn">保存PNG</button>
+                        </div>
+                    </div>
+                    <canvas id="drawing-canvas"></canvas>
+                </div>
+
+                <!-- 时钟 -->
+                <div id="clock" class="tool-panel">
+                    <div class="clock-display">
+                        <div id="digital-clock" class="digital-clock">00:00:00</div>
+                        <div id="date-display" class="date-display">2024-01-01</div>
+                    </div>
+                    <div class="world-clocks">
+                        <div class="world-clock-item">
+                            <span class="timezone-name">北京</span>
+                            <span id="clock-beijing" class="timezone-time">00:00:00</span>
+                        </div>
+                        <div class="world-clock-item">
+                            <span class="timezone-name">纽约</span>
+                            <span id="clock-newyork" class="timezone-time">00:00:00</span>
+                        </div>
+                        <div class="world-clock-item">
+                            <span class="timezone-name">伦敦</span>
+                            <span id="clock-london" class="timezone-time">00:00:00</span>
+                        </div>
+                        <div class="world-clock-item">
+                            <span class="timezone-name">东京</span>
+                            <span id="clock-tokyo" class="timezone-time">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 待办事项 -->
+                <div id="todo" class="tool-panel">
+                    <div class="todo-input-container">
+                        <input type="text" id="todo-input" placeholder="添加新任务...">
+                        <button id="add-todo-btn" class="action-btn">添加</button>
+                    </div>
+                    <div id="todo-list" class="todo-list">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div class="empty-state-text">暂无任务</div>
+                            <div class="empty-state-hint">在上方输入框添加新任务</div>
+                        </div>
+                    </div>
+                    <div class="todo-stats">
+                        <span id="todo-count">0 个任务</span>
+                        <button id="clear-completed-btn" class="clear-btn">清除已完成</button>
+                    </div>
+                </div>
+
+                <!-- 便签 -->
+                <div id="notes" class="tool-panel">
+                    <div class="notes-toolbar">
+                        <button id="add-note-btn" class="action-btn">新建便签</button>
+                        <button id="clear-notes-btn" class="action-btn">清空全部</button>
+                    </div>
+                    <div id="notes-container" class="notes-container">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <div class="empty-state-text">暂无便签</div>
+                            <div class="empty-state-hint">点击"新建便签"开始记录</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 颜色转换器 -->
+                <div id="color" class="tool-panel">
+                    <div class="color-converter">
+                        <div class="color-preview">
+                            <input type="color" id="color-picker" value="#000000">
+                            <div id="color-preview-box" class="color-preview-box"></div>
+                        </div>
+                        <div class="color-inputs">
+                            <div class="color-input-group">
+                                <label>HEX:</label>
+                                <input type="text" id="color-hex" value="#000000">
+                            </div>
+                            <div class="color-input-group">
+                                <label>RGB:</label>
+                                <input type="text" id="color-rgb" value="rgb(0, 0, 0)">
+                            </div>
+                            <div class="color-input-group">
+                                <label>HSL:</label>
+                                <input type="text" id="color-hsl" value="hsl(0, 0%, 0%)">
+                            </div>
+                        </div>
+                        <div class="color-palette">
+                            <div class="color-preset" data-color="#000000"></div>
+                            <div class="color-preset" data-color="#FFFFFF"></div>
+                            <div class="color-preset" data-color="#FF0000"></div>
+                            <div class="color-preset" data-color="#00FF00"></div>
+                            <div class="color-preset" data-color="#0000FF"></div>
+                            <div class="color-preset" data-color="#FFFF00"></div>
+                            <div class="color-preset" data-color="#FF00FF"></div>
+                            <div class="color-preset" data-color="#00FFFF"></div>
+                            <div class="color-preset" data-color="#FFA500"></div>
+                            <div class="color-preset" data-color="#800080"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 一言 -->
+                <div id="quote" class="tool-panel">
+                    <div class="quote-container">
+                        <div id="quote-text" class="quote-text">生活不是等待风暴过去，而是学会在雨中翩翩起舞。</div>
+                        <div id="quote-author" class="quote-author">维维安·格林</div>
+                    </div>
+                    <div class="quote-actions">
+                        <button id="refresh-quote" class="refresh-quote-btn">获取新一言</button>
+                        <button id="copy-quote" class="copy-quote-btn">复制</button>
+                    </div>
+                </div>
+
+                <!-- 单位转换器 -->
+                <div id="converter" class="tool-panel">
+                    <div class="converter-tabs">
+                        <button class="converter-tab active" data-type="length">长度</button>
+                        <button class="converter-tab" data-type="weight">重量</button>
+                        <button class="converter-tab" data-type="temperature">温度</button>
+                    </div>
+                    <div class="converter-content">
+                        <div class="converter-input-group">
+                            <input type="number" id="converter-input" placeholder="输入数值" class="converter-input">
+                            <select id="converter-from" class="converter-select">
+                                <option value="m">米</option>
+                                <option value="km">千米</option>
+                                <option value="cm">厘米</option>
+                                <option value="mm">毫米</option>
+                                <option value="ft">英尺</option>
+                                <option value="in">英寸</option>
+                            </select>
+                        </div>
+                        <div class="converter-arrow">↓</div>
+                        <div class="converter-input-group">
+                            <input type="number" id="converter-output" readonly class="converter-output">
+                            <select id="converter-to" class="converter-select">
+                                <option value="m">米</option>
+                                <option value="km">千米</option>
+                                <option value="cm">厘米</option>
+                                <option value="mm">毫米</option>
+                                <option value="ft">英尺</option>
+                                <option value="in">英寸</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 密码生成器 -->
+                <div id="password" class="tool-panel">
+                    <div class="password-generator">
+                        <div class="password-display">
+                            <input type="text" id="password-output" readonly class="password-output" placeholder="点击生成密码">
+                            <button id="copy-password" class="copy-password-btn">复制</button>
+                        </div>
+                        <div class="password-options">
+                            <div class="password-option">
+                                <label>长度: <span id="password-length-value">12</span></label>
+                                <input type="range" id="password-length" min="6" max="32" value="12">
+                            </div>
+                            <div class="password-option">
+                                <label>
+                                    <input type="checkbox" id="password-uppercase" checked>
+                                    大写字母
+                                </label>
+                            </div>
+                            <div class="password-option">
+                                <label>
+                                    <input type="checkbox" id="password-lowercase" checked>
+                                    小写字母
+                                </label>
+                            </div>
+                            <div class="password-option">
+                                <label>
+                                    <input type="checkbox" id="password-numbers" checked>
+                                    数字
+                                </label>
+                            </div>
+                            <div class="password-option">
+                                <label>
+                                    <input type="checkbox" id="password-symbols">
+                                    特殊字符
+                                </label>
+                            </div>
+                        </div>
+                        <button id="generate-password" class="generate-password-btn">生成密码</button>
+                    </div>
+                </div>
+
+                <!-- 文本分析工具 -->
+                <div id="text-analyzer" class="tool-panel">
+                    <div class="text-analyzer">
+                        <textarea id="text-analyzer-input" class="text-analyzer-input" placeholder="在此输入文本进行分析..."></textarea>
+                        <div class="text-analyzer-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">字符数</span>
+                                <span class="stat-value" id="stat-chars">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">单词数</span>
+                                <span class="stat-value" id="stat-words">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">行数</span>
+                                <span class="stat-value" id="stat-lines">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">段落数</span>
+                                <span class="stat-value" id="stat-paragraphs">0</span>
+                            </div>
+                        </div>
+                        <div class="text-analyzer-actions">
+                            <button id="clear-text-analyzer" class="action-btn">清空</button>
+                            <button id="copy-text-stats" class="action-btn">复制统计</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 时间戳转换器 -->
+                <div id="timestamp" class="tool-panel">
+                    <div class="timestamp-converter">
+                        <div class="timestamp-section">
+                            <h4>时间戳转日期</h4>
+                            <div class="timestamp-input-group">
+                                <input type="number" id="timestamp-input" placeholder="输入时间戳（秒或毫秒）" class="timestamp-input">
+                                <button id="convert-timestamp" class="action-btn">转换</button>
+                            </div>
+                            <div class="timestamp-result">
+                                <span id="timestamp-result">等待转换...</span>
+                            </div>
+                        </div>
+                        <div class="timestamp-divider"></div>
+                        <div class="timestamp-section">
+                            <h4>日期转时间戳</h4>
+                            <div class="timestamp-input-group">
+                                <input type="datetime-local" id="date-input" class="date-input">
+                                <button id="convert-date" class="action-btn">转换</button>
+                            </div>
+                            <div class="timestamp-result">
+                                <span id="date-result">等待转换...</span>
+                            </div>
+                        </div>
+                        <div class="timestamp-current">
+                            <button id="current-timestamp" class="action-btn">获取当前时间戳</button>
+                            <span id="current-timestamp-result"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设置 -->
+                <div id="settings" class="tool-panel">
+                    <div class="settings-section">
+                        <h4>主题色选择</h4>
+                        <div class="settings-description">选择莫奈风格的配色方案，打造专属视觉体验</div>
+                        <div class="theme-selector">
+                            <div class="theme-option active" data-theme="default" title="印象蓝"></div>
+                            <div class="theme-option" data-theme="lotus" title="睡莲紫"></div>
+                            <div class="theme-option" data-theme="sunrise" title="日出橙"></div>
+                            <div class="theme-option" data-theme="sunset" title="日落红"></div>
+                            <div class="theme-option" data-theme="garden" title="草地绿"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>界面设置</h4>
+                        <div class="settings-dark-mode-toggle">
+                            <span class="toggle-label">深色模式</span>
+                            <div class="toggle-switch" id="settings-dark-mode"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>数据统计</h4>
+                        <div class="settings-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">待办任务</span>
+                                <span class="stat-value" id="stat-todos">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">便签数量</span>
+                                <span class="stat-value" id="stat-notes">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">已保存文件</span>
+                                <span class="stat-value" id="stat-saved">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>数据管理</h4>
+                        <div class="settings-description">清除所有本地存储的数据，恢复初始状态</div>
+                        <button id="clear-all-data-btn" class="clear-all-data-btn">清除所有数据</button>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>关于</h4>
+                        <div class="settings-description">
+                            <strong>Markdown 办公编辑器 v2.0</strong><br><br>
+                            采用莫奈风格配色，简约优雅，功能强大。<br><br>
+                            <strong>功能特点：</strong><br>
+                            • 实时 Markdown 预览<br>
+                            • 快速编辑工具栏（支持快捷键）<br>
+                            • 多功能工具箱（计算器、画板、时钟、待办、便签、颜色、一言）<br>
+                            • 莫奈风格主题配色（5种主题）<br>
+                            • 支持深色/浅色模式<br>
+                            • 代码高亮（支持25+编程语言）<br>
+                            • 搜索功能（Ctrl+F）<br>
+                            • 滚动同步（编辑器与预览区同步）<br>
+                            • 自动保存（每3秒保存到本地）<br>
+                            • 面板宽度可拖拽调整<br>
+                            • 导入/导出 Markdown 文件<br>
+                            • 复制预览内容（支持富文本和纯文本）<br>
+                            • 字数统计与段落计数<br>
+                            • 数据本地持久化存储<br><br>
+                            <strong>快捷键：</strong><br>
+                            • Ctrl+B: 粗体<br>
+                            • Ctrl+I: 斜体<br>
+                            • Ctrl+K: 代码<br>
+                            • Ctrl+L: 链接<br>
+                            • Ctrl+F: 搜索<br>
+                            • Ctrl+S: 保存为 HTML<br>
+                            • Ctrl+Shift+S: 保存为 Markdown<br>
+                            • 数字键 1-7: 切换工具<br>
+                            • 数字键 8: 打开设置<br><br>
+                            <strong>技术栈：</strong><br>
+                            HTML5 + CSS3 + 原生 JavaScript<br>
+                            marked.js（Markdown解析）<br>
+                            highlight.js（代码高亮）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 外部库引用 -->
+    <!-- marked.js: Markdown 解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- highlight.js: 代码高亮库 -->
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+    <!-- highlight.js 语言包 -->
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/html.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
+    <!-- 主逻辑脚本 -->
+    <script src="script.js"></script>
+</body>
+</html>
