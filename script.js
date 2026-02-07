@@ -1003,28 +1003,29 @@ toolBtns.forEach(btn => {
 
 // 计算器功能
 const calcDisplay = document.getElementById('calc-display');
-const calcBtns = document.querySelectorAll('.calc-btn');
 let currentValue = '0';
 let previousValue = '';
 let operator = '';
 let shouldResetDisplay = false;
 
-calcBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const value = this.getAttribute('data-value');
-        const action = this.getAttribute('data-action');
+// 优化：使用事件委托，减少事件监听器数量
+document.querySelector('.calculator-buttons').addEventListener('click', function(e) {
+    const btn = e.target.closest('.calc-btn');
+    if (!btn) return;
+    
+    const value = btn.getAttribute('data-value');
+    const action = btn.getAttribute('data-action');
 
-        if (value !== null) {
-            handleNumber(value);
-        } else if (action) {
-            handleAction(action);
-        }
-        
-        // 添加点击动画
-        this.style.animation = 'none';
-        this.offsetHeight; // 触发重绘
-        this.style.animation = 'pulse 0.3s ease';
-    });
+    if (value !== null) {
+        handleNumber(value);
+    } else if (action) {
+        handleAction(action);
+    }
+    
+    // 添加点击动画
+    btn.style.animation = 'none';
+    btn.offsetHeight; // 触发重绘
+    btn.style.animation = 'pulse 0.3s ease';
 });
 
 function handleNumber(num) {
@@ -1713,11 +1714,22 @@ const colorPreviewBox = document.getElementById('color-preview-box');
 const colorHex = document.getElementById('color-hex');
 const colorRgb = document.getElementById('color-rgb');
 const colorHsl = document.getElementById('color-hsl');
-const colorPresets = document.querySelectorAll('.color-preset');
+const colorPalette = document.querySelector('.color-palette');
 
 // 确保所有元素都存在
 if (!colorPicker || !colorPreviewBox || !colorHex || !colorRgb || !colorHsl) {
     console.error('颜色转换器元素未找到');
+}
+
+// 优化：使用事件委托处理颜色预设点击
+if (colorPalette) {
+    colorPalette.addEventListener('click', function(e) {
+        const preset = e.target.closest('.color-preset');
+        if (preset) {
+            const color = preset.dataset.color;
+            updateColorInputs(color);
+        }
+    });
 }
 
 function hexToRgb(hex) {
