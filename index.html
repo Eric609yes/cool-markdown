@@ -172,6 +172,21 @@
                     </svg>
                 </button>
                 <div class="toolbar-divider"></div>
+                <button class="quick-btn tooltip" id="datetime-btn" data-tooltip="插入日期时间">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </button>
+                <button class="quick-btn tooltip" id="shortcuts-btn" data-tooltip="快捷键 (? or Ctrl+/)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </button>
                 <button class="quick-btn tooltip" id="save-progress-btn" data-tooltip="保存进度 (Ctrl+Shift+P)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
@@ -187,11 +202,16 @@
                 </button>
             </div>
             <div class="search-bar" id="search-bar" style="display: none;">
-                <input type="text" id="search-input" placeholder="搜索..." class="search-input">
+                <div class="search-inputs-wrapper">
+                    <input type="text" id="search-input" placeholder="搜索..." class="search-input">
+                    <input type="text" id="replace-input" placeholder="替换..." class="search-input">
+                </div>
                 <div class="search-controls">
                     <button class="search-nav-btn" id="search-prev" title="上一个">↑</button>
                     <span id="search-count" class="search-count">0/0</span>
                     <button class="search-nav-btn" id="search-next" title="下一个">↓</button>
+                    <button class="search-action-btn" id="replace-btn" title="替换当前">替换</button>
+                    <button class="search-action-btn" id="replace-all-btn" title="替换全部">全部</button>
                     <button class="search-close-btn" id="search-close" title="关闭">×</button>
                 </div>
             </div>
@@ -466,7 +486,10 @@ Q. 时间戳  - 时间戳转换
                     </div>
                     <div class="todo-stats">
                         <span id="todo-count">0 个任务</span>
-                        <button id="clear-completed-btn" class="clear-btn">清除已完成</button>
+                        <div class="todo-actions">
+                            <button id="export-todos-btn" class="clear-btn">导出</button>
+                            <button id="clear-completed-btn" class="clear-btn">清除已完成</button>
+                        </div>
                     </div>
                 </div>
 
@@ -750,6 +773,91 @@ Q. 时间戳  - 时间戳转换
                             highlight.js（代码高亮）
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷键提示面板 -->
+    <div id="shortcuts-panel" class="shortcuts-panel">
+        <div class="shortcuts-header">
+            <h3>快捷键</h3>
+            <button id="shortcuts-close" class="shortcuts-close">×</button>
+        </div>
+        <div class="shortcuts-content">
+            <div class="shortcuts-category">
+                <h4>编辑操作</h4>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+B</span>
+                    <span class="shortcut-desc">粗体</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+I</span>
+                    <span class="shortcut-desc">斜体</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+K</span>
+                    <span class="shortcut-desc">代码</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+L</span>
+                    <span class="shortcut-desc">链接</span>
+                </div>
+            </div>
+            <div class="shortcuts-category">
+                <h4>搜索与替换</h4>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+F</span>
+                    <span class="shortcut-desc">搜索</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+H</span>
+                    <span class="shortcut-desc">替换</span>
+                </div>
+            </div>
+            <div class="shortcuts-category">
+                <h4>保存操作</h4>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+S</span>
+                    <span class="shortcut-desc">保存为HTML</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+Shift+S</span>
+                    <span class="shortcut-desc">保存为MD</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+Shift+P</span>
+                    <span class="shortcut-desc">保存进度</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl+Shift+L</span>
+                    <span class="shortcut-desc">恢复进度</span>
+                </div>
+            </div>
+            <div class="shortcuts-category">
+                <h4>工具切换</h4>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">1-9, 0</span>
+                    <span class="shortcut-desc">切换工具</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Q</span>
+                    <span class="shortcut-desc">时间戳</span>
+                </div>
+            </div>
+            <div class="shortcuts-category">
+                <h4>其他</h4>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">F11</span>
+                    <span class="shortcut-desc">全屏</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Esc</span>
+                    <span class="shortcut-desc">退出全屏/关闭面板</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">? / Ctrl+/</span>
+                    <span class="shortcut-desc">显示快捷键</span>
                 </div>
             </div>
         </div>

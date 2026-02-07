@@ -1232,14 +1232,18 @@ body.dark-mode .theme-icon {
 /* 搜索栏样式 */
 .search-bar {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
-    padding: 8px 14px;
+    padding: 10px 14px;
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-color);
-    flex-wrap: wrap;
     position: relative;
     z-index: 100;
+}
+
+.search-inputs-wrapper {
+    display: flex;
+    gap: 8px;
 }
 
 .search-input {
@@ -1264,6 +1268,7 @@ body.dark-mode .theme-icon {
     display: flex;
     align-items: center;
     gap: 6px;
+    justify-content: space-between;
 }
 
 .search-nav-btn {
@@ -1319,6 +1324,29 @@ body.dark-mode .theme-icon {
     background: var(--color-error);
     color: var(--bg-primary);
     border-color: var(--color-error);
+}
+
+.search-action-btn {
+    width: auto;
+    padding: 0 12px;
+    height: 28px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-action-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border-color: var(--accent-medium);
+    box-shadow: 0 2px 4px var(--shadow-light);
 }
 
 /* 编辑器状态栏 */
@@ -3187,4 +3215,152 @@ input[type="radio"]:hover {
     color: var(--text-primary);
     font-size: 14px;
     font-family: monospace;
+}
+
+/* ========================================
+   快捷键提示面板样式
+   ======================================== */
+
+.shortcuts-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 600px;
+    max-width: 90vw;
+    max-height: 80vh;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px var(--shadow-strong);
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    will-change: transform, opacity;
+}
+
+.shortcuts-panel.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.shortcuts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    border-radius: 12px 12px 0 0;
+}
+
+.shortcuts-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.shortcuts-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shortcuts-close:hover {
+    background: var(--color-error);
+    color: var(--bg-primary);
+    transform: rotate(90deg);
+}
+
+.shortcuts-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.shortcuts-category {
+    margin-bottom: 20px;
+}
+
+.shortcuts-category:last-child {
+    margin-bottom: 0;
+}
+
+.shortcuts-category h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.shortcut-item:last-child {
+    border-bottom: none;
+}
+
+.shortcut-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: var(--text-primary);
+}
+
+.shortcut-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* 待办事项操作按钮样式 */
+.todo-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 快捷键面板滚动条 */
+.shortcuts-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shortcuts-content::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+.shortcuts-content::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+}
+
+.shortcuts-content::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-medium);
 }

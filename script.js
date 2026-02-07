@@ -247,6 +247,64 @@ searchPrev.addEventListener('click', () => navigateSearch(-1));
 searchNext.addEventListener('click', () => navigateSearch(1));
 searchClose.addEventListener('click', toggleSearchBar);
 
+// 替换功能
+const replaceBtn = document.getElementById('replace-btn');
+const replaceAllBtn = document.getElementById('replace-all-btn');
+const replaceInput = document.getElementById('replace-input');
+
+if (replaceBtn) {
+    replaceBtn.addEventListener('click', function() {
+        const searchText = searchInput.value.trim();
+        const replaceText = replaceInput.value;
+        
+        if (!searchText || searchMatches.length === 0) {
+            showToast('请先搜索内容');
+            return;
+        }
+        
+        if (currentMatchIndex >= 0 && currentMatchIndex < searchMatches.length) {
+            const match = searchMatches[currentMatchIndex];
+            const before = editor.value.substring(0, match.index);
+            const after = editor.value.substring(match.end);
+            
+            editor.value = before + replaceText + after;
+            editor.dispatchEvent(new Event('input'));
+            
+            showToast('已替换');
+            
+            // 重新搜索
+            performSearch();
+        }
+    });
+}
+
+if (replaceAllBtn) {
+    replaceAllBtn.addEventListener('click', function() {
+        const searchText = searchInput.value.trim();
+        const replaceText = replaceInput.value;
+        
+        if (!searchText) {
+            showToast('请输入要搜索的内容');
+            return;
+        }
+        
+        const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        const matchCount = (editor.value.match(regex) || []).length;
+        
+        if (matchCount === 0) {
+            showToast('未找到匹配内容');
+            return;
+        }
+        
+        if (confirm(`确定要替换全部 ${matchCount} 处内容吗？`)) {
+            editor.value = editor.value.replace(regex, replaceText);
+            editor.dispatchEvent(new Event('input'));
+            showToast(`已替换 ${matchCount} 处`);
+            performSearch();
+        }
+    });
+}
+
 // 快捷键 - 搜索
 // 已合并到统一的键盘事件处理器中（见代码末尾）
 
@@ -754,6 +812,35 @@ document.getElementById('save-md-btn').addEventListener('click', function() {
     localStorage.setItem('savedFileCount', savedFileCount);
     updateStats();
 });
+
+// 日期时间插入功能
+const datetimeBtn = document.getElementById('datetime-btn');
+
+if (datetimeBtn) {
+    datetimeBtn.addEventListener('click', function() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const datetimeStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const beforeText = editor.value.substring(0, start);
+        const afterText = editor.value.substring(end);
+        
+        editor.value = beforeText + datetimeStr + afterText;
+        editor.focus();
+        editor.setSelectionRange(start + datetimeStr.length, start + datetimeStr.length);
+        editor.dispatchEvent(new Event('input'));
+        
+        showToast('已插入日期时间');
+    });
+}
 
 // 导入Markdown文件功能
 const importMdBtn = document.getElementById('import-md-btn');
@@ -1441,6 +1528,50 @@ clearCompletedBtn.addEventListener('click', function() {
     saveTodos();
     renderTodos();
 });
+
+// 待办事项导出功能
+const exportTodosBtn = document.getElementById('export-todos-btn');
+
+if (exportTodosBtn) {
+    exportTodosBtn.addEventListener('click', function() {
+        if (todos.length === 0) {
+            showToast('没有待办事项可导出');
+            return;
+        }
+        
+        let markdown = '# 待办事项\n\n';
+        
+        const activeTodos = todos.filter(t => !t.completed);
+        const completedTodos = todos.filter(t => t.completed);
+        
+        if (activeTodos.length > 0) {
+            markdown += '## 待完成\n';
+            activeTodos.forEach((todo, index) => {
+                markdown += `- [ ] ${todo.text}\n`;
+            });
+            markdown += '\n';
+        }
+        
+        if (completedTodos.length > 0) {
+            markdown += '## 已完成\n';
+            completedTodos.forEach((todo, index) => {
+                markdown += `- [x] ${todo.text}\n`;
+            });
+            markdown += '\n';
+        }
+        
+        markdown += `\n---\n导出时间: ${new Date().toLocaleString()}\n`;
+        
+        const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'todos-' + Date.now() + '.md';
+        link.click();
+        URL.revokeObjectURL(link.href);
+        
+        showToast(`已导出 ${todos.length} 个待办事项`);
+    });
+}
 
 renderTodos();
 
@@ -2437,5 +2568,45 @@ document.addEventListener('keydown', function(e) {
             toolBtn.click();
         }
         return;
+    }
+    
+    // ? 或 Ctrl+/: 显示快捷键面板
+    if (e.key === '?' || (e.ctrlKey && e.key === '/')) {
+        e.preventDefault();
+        const shortcutsPanel = document.getElementById('shortcuts-panel');
+        if (shortcutsPanel) {
+            shortcutsPanel.classList.toggle('show');
+        }
+        return;
+    }
+});
+
+// 快捷键面板功能
+const shortcutsBtn = document.getElementById('shortcuts-btn');
+const shortcutsPanel = document.getElementById('shortcuts-panel');
+const shortcutsClose = document.getElementById('shortcuts-close');
+
+if (shortcutsBtn) {
+    shortcutsBtn.addEventListener('click', function() {
+        if (shortcutsPanel) {
+            shortcutsPanel.classList.toggle('show');
+        }
+    });
+}
+
+if (shortcutsClose) {
+    shortcutsClose.addEventListener('click', function() {
+        if (shortcutsPanel) {
+            shortcutsPanel.classList.remove('show');
+        }
+    });
+}
+
+// 点击快捷键面板外部关闭
+document.addEventListener('click', function(e) {
+    if (shortcutsPanel && shortcutsPanel.classList.contains('show')) {
+        if (!shortcutsPanel.contains(e.target) && e.target !== shortcutsBtn) {
+            shortcutsPanel.classList.remove('show');
+        }
     }
 });
