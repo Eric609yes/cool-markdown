@@ -2011,7 +2011,7 @@ body.theme-garden #preview .hljs-title {
 
 .tooltip::after {
     content: attr(data-tooltip);
-    position: absolute;
+    position: fixed;
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%) var(--tooltip-transform);
@@ -2034,7 +2034,7 @@ body.theme-garden #preview .hljs-title {
 .tooltip:hover::after {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(-4px);
+    transform: translateX(-50%) translateY(-8px);
     transition-delay: 0.1s;
 }
 

@@ -2573,40 +2573,50 @@ document.addEventListener('keydown', function(e) {
     // ? 或 Ctrl+/: 显示快捷键面板
     if (e.key === '?' || (e.ctrlKey && e.key === '/')) {
         e.preventDefault();
+        e.stopPropagation();
         const shortcutsPanel = document.getElementById('shortcuts-panel');
-        if (shortcutsPanel) {
+        const shortcutsBtn = document.getElementById('shortcuts-btn');
+        if (shortcutsBtn) {
+            shortcutsBtn.click();
+        } else if (shortcutsPanel) {
             shortcutsPanel.classList.toggle('show');
         }
         return;
     }
 });
 
-// 快捷键面板功能
-const shortcutsBtn = document.getElementById('shortcuts-btn');
-const shortcutsPanel = document.getElementById('shortcuts-panel');
-const shortcutsClose = document.getElementById('shortcuts-close');
+// 快捷键面板功能 - 需要在DOMContentLoaded中绑定
+document.addEventListener('DOMContentLoaded', function() {
+    const shortcutsBtn = document.getElementById('shortcuts-btn');
+    const shortcutsPanel = document.getElementById('shortcuts-panel');
+    const shortcutsClose = document.getElementById('shortcuts-close');
 
-if (shortcutsBtn) {
-    shortcutsBtn.addEventListener('click', function() {
-        if (shortcutsPanel) {
-            shortcutsPanel.classList.toggle('show');
-        }
-    });
-}
-
-if (shortcutsClose) {
-    shortcutsClose.addEventListener('click', function() {
-        if (shortcutsPanel) {
-            shortcutsPanel.classList.remove('show');
-        }
-    });
-}
-
-// 点击快捷键面板外部关闭
-document.addEventListener('click', function(e) {
-    if (shortcutsPanel && shortcutsPanel.classList.contains('show')) {
-        if (!shortcutsPanel.contains(e.target) && e.target !== shortcutsBtn) {
-            shortcutsPanel.classList.remove('show');
-        }
+    if (shortcutsBtn) {
+        shortcutsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (shortcutsPanel) {
+                shortcutsPanel.classList.toggle('show');
+            }
+        });
     }
+
+    if (shortcutsClose) {
+        shortcutsClose.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (shortcutsPanel) {
+                shortcutsPanel.classList.remove('show');
+            }
+        });
+    }
+
+    // 点击快捷键面板外部关闭
+    document.addEventListener('click', function(e) {
+        if (shortcutsPanel && shortcutsPanel.classList.contains('show')) {
+            if (!shortcutsPanel.contains(e.target) && e.target !== shortcutsBtn) {
+                shortcutsPanel.classList.remove('show');
+            }
+        }
+    });
 });
