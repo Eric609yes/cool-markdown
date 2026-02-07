@@ -34,9 +34,17 @@ const preview = document.getElementById('preview');
 
 /**
  * 防抖函数 - 优化频繁触发的事件
+ * 
+ * 防抖确保函数在指定时间内只执行一次，即使多次调用也只执行最后一次。
+ * 常用于搜索输入、窗口调整大小等场景，减少不必要的计算和渲染。
+ * 
  * @param {Function} func - 要执行的函数
- * @param {number} wait - 等待时间(毫秒)
+ * @param {number} wait - 等待时间(毫秒)，在这段时间内如果再次调用则重新计时
  * @returns {Function} 防抖后的函数
+ * 
+ * @example
+ * const debouncedSearch = debounce(searchFunction, 300);
+ * searchInput.addEventListener('input', debouncedSearch);
  */
 function debounce(func, wait) {
     let timeout;
@@ -52,9 +60,17 @@ function debounce(func, wait) {
 
 /**
  * 节流函数 - 限制函数执行频率
+ * 
+ * 节流确保函数在指定时间间隔内最多执行一次，忽略中间的多次调用。
+ * 常用于滚动事件、鼠标移动等高频事件，提高性能。
+ * 
  * @param {Function} func - 要执行的函数
- * @param {number} limit - 时间间隔(毫秒)
+ * @param {number} limit - 时间间隔(毫秒)，函数执行之间的最小间隔
  * @returns {Function} 节流后的函数
+ * 
+ * @example
+ * const throttledScroll = throttle(handleScroll, 100);
+ * window.addEventListener('scroll', throttledScroll);
  */
 function throttle(func, limit) {
     let inThrottle;
@@ -88,12 +104,26 @@ marked.setOptions({
 const autoSaveInterval = 3000; // 3秒自动保存
 const autoSaveStatus = document.getElementById('auto-save-status');
 
+/**
+ * 保存编辑器内容到 localStorage
+ * 
+ * 将当前编辑器的内容和保存时间戳保存到浏览器的 localStorage 中，
+ * 实现数据的持久化存储，防止意外刷新丢失内容。
+ */
 function saveToLocalStorage() {
     localStorage.setItem('editorContent', editor.value);
     localStorage.setItem('editorLastSave', Date.now());
     showAutoSaveStatus('saved');
 }
 
+/**
+ * 显示自动保存状态提示
+ * 
+ * 在编辑器状态栏显示保存状态（正在保存/已保存），
+ * 并在2秒后自动隐藏提示。
+ * 
+ * @param {string} status - 保存状态，可选值为 'saving' 或 'saved'
+ */
 function showAutoSaveStatus(status) {
     autoSaveStatus.classList.remove('saving', 'saved');
     if (status === 'saving') {
@@ -119,6 +149,14 @@ const debouncedSave = debounce(() => {
 editor.addEventListener('input', debouncedSave);
 
 // 从localStorage加载保存的内容
+/**
+ * 从 localStorage 加载保存的内容
+ * 
+ * 尝试从 localStorage 恢复编辑器内容：
+ * - 如果有保存的内容，直接加载并渲染预览
+ * - 如果是第一次访问（hasVisited 不存在），显示欢迎介绍文本
+ * - 如果已访问过但没有保存内容，显示空白编辑器
+ */
 function loadFromLocalStorage() {
     const savedContent = localStorage.getItem('editorContent');
     const hasVisited = localStorage.getItem('hasVisited');
@@ -154,6 +192,12 @@ const searchCount = document.getElementById('search-count');
 let searchMatches = [];
 let currentMatchIndex = -1;
 
+/**
+ * 切换搜索栏的显示/隐藏状态
+ * 
+ * 如果搜索栏当前隐藏，则显示并聚焦到搜索输入框；
+ * 如果搜索栏当前显示，则隐藏它。
+ */
 function toggleSearchBar() {
     const isVisible = searchBar.style.display !== 'none';
     searchBar.style.display = isVisible ? 'none' : 'flex';
@@ -162,6 +206,14 @@ function toggleSearchBar() {
     }
 }
 
+/**
+ * 在编辑器中执行搜索
+ * 
+ * 搜索编辑器中所有匹配的文本，记录所有匹配项的位置和内容，
+ * 并高亮显示第一个匹配项。搜索是全局且不区分大小写的。
+ * 
+ * 搜索结果会更新 searchMatches 数组和 searchCount 显示。
+ */
 function performSearch() {
     const searchText = searchInput.value.trim();
     if (!searchText) {
@@ -175,8 +227,10 @@ function performSearch() {
     
     const content = editor.value;
     let match;
+    // 转义正则表达式特殊字符，进行全局不区分大小写搜索
     const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     
+    // 查找所有匹配项
     while ((match = regex.exec(content)) !== null) {
         searchMatches.push({
             index: match.index,
@@ -193,20 +247,35 @@ function performSearch() {
     searchCount.textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
 }
 
+/**
+ * 高亮显示当前搜索匹配项
+ * 
+ * 将光标定位到当前匹配项的位置，并自动滚动编辑器使匹配项可见。
+ */
 function highlightCurrentMatch() {
     if (searchMatches.length === 0 || currentMatchIndex < 0) return;
     
     const match = searchMatches[currentMatchIndex];
     editor.focus();
     editor.setSelectionRange(match.index, match.end);
+    // 滚动到匹配项位置，使其显示在编辑器中间
     editor.scrollTop = editor.value.substring(0, match.index).split('\n').length * 20 - editor.clientHeight / 2;
 }
 
+/**
+ * 导航到上一个或下一个搜索匹配项
+ * 
+ * @param {number} direction - 导航方向，-1 表示上一个，1 表示下一个
+ * 
+ * 支持循环导航：从第一个匹配项导航到上一个会跳到最后一个，
+ * 从最后一个匹配项导航到下一个会跳到第一个。
+ */
 function navigateSearch(direction) {
     if (searchMatches.length === 0) return;
     
     currentMatchIndex += direction;
     
+    // 循环导航
     if (currentMatchIndex < 0) {
         currentMatchIndex = searchMatches.length - 1;
     } else if (currentMatchIndex >= searchMatches.length) {
@@ -217,6 +286,11 @@ function navigateSearch(direction) {
     searchCount.textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
 }
 
+/**
+ * 清除搜索结果和高亮
+ * 
+ * 清空搜索匹配项数组、重置当前匹配索引、更新搜索计数显示。
+ */
 function clearSearchHighlights() {
     searchMatches = [];
     currentMatchIndex = -1;
@@ -320,15 +394,15 @@ clearBtn.addEventListener('click', function() {
     }
 });
 
-// 重置内容功能
+// 重置内容功能 - 恢复到初始欢迎内容
 const resetBtn = document.getElementById('reset-btn');
 
 resetBtn.addEventListener('click', function() {
-    if (confirm('确定要清空编辑器内容吗？此操作不可撤销。')) {
-        editor.value = '';
-        preview.innerHTML = '';
+    if (confirm('确定要重置编辑器内容吗？此操作将恢复到初始欢迎内容。')) {
+        editor.value = editor.placeholder;
+        preview.innerHTML = marked.parse(editor.placeholder);
         saveToLocalStorage();
-        showToast('编辑器已清空');
+        showToast('编辑器已重置');
     }
 });
 
@@ -590,6 +664,12 @@ editor.addEventListener('click', function() {
     updateLineColumnInfo();
 });
 
+/**
+ * 更新编辑器状态栏的行列号信息
+ * 
+ * 根据当前光标位置计算行号和列号，并更新到状态栏显示。
+ * 行号从1开始计数，列号从0开始计数。
+ */
 function updateLineColumnInfo() {
     const cursorPos = editor.selectionStart;
     const textBeforeCursor = editor.value.substring(0, cursorPos);
@@ -615,6 +695,29 @@ quickBtns.forEach(btn => {
     });
 });
 
+/**
+ * 在编辑器中插入 Markdown 语法
+ * 
+ * 根据指定的操作类型，在当前光标位置插入相应的 Markdown 语法。
+ * 如果选中有文本，则对选中的文本应用格式；如果没有选中文本，
+ * 则插入带默认文本的格式占位符。
+ * 
+ * @param {string} action - 操作类型，可选值：
+ *   - 'bold': 粗体
+ *   - 'italic': 斜体
+ *   - 'strikethrough': 删除线
+ *   - 'h1', 'h2', 'h3': 标题
+ *   - 'ul': 无序列表
+ *   - 'ol': 有序列表
+ *   - 'checkbox': 复选框
+ *   - 'code': 行内代码
+ *   - 'codeblock': 代码块
+ *   - 'quote': 引用
+ *   - 'link': 链接
+ *   - 'image': 图片
+ *   - 'table': 表格
+ *   - 'hr': 水平分割线
+ */
 function insertMarkdown(action) {
     const start = editor.selectionStart;
     const end = editor.selectionEnd;
@@ -924,12 +1027,22 @@ let startLeftWidth = 0;
 let startCenterWidth = 0;
 
 // 保存面板宽度到localStorage
+/**
+ * 保存面板宽度到 localStorage
+ * 
+ * 将左侧和中间面板的当前宽度保存到 localStorage，以便在下次访问时恢复。
+ */
 function savePanelWidths() {
     localStorage.setItem('leftPanelWidth', leftPanel.style.flexBasis);
     localStorage.setItem('centerPanelWidth', centerPanel.style.flexBasis);
 }
 
-// 加载保存的面板宽度
+/**
+ * 从 localStorage 加载保存的面板宽度
+ * 
+ * 恢复上次保存的面板宽度设置。如果未保存过，则使用默认宽度（三等分）。
+ * 右侧面板会自动填充剩余空间。
+ */
 function loadPanelWidths() {
     const savedLeftWidth = localStorage.getItem('leftPanelWidth');
     const savedCenterWidth = localStorage.getItem('centerPanelWidth');
@@ -962,6 +1075,14 @@ function loadPanelWidths() {
 }
 
 // 拖拽处理函数
+/**
+ * 处理面板拖拽调整的开始事件
+ * 
+ * 当用户按下分割线时初始化拖拽状态，记录初始位置和宽度。
+ * 
+ * @param {MouseEvent} e - 鼠标事件对象
+ * @param {HTMLElement} resizer - 被拖拽的分割线元素
+ */
 function handleMouseDown(e, resizer) {
     isResizing = true;
     currentResizer = resizer;
@@ -977,6 +1098,14 @@ function handleMouseDown(e, resizer) {
     container.style.willChange = 'flex-basis';
 }
 
+/**
+ * 处理面板拖拽过程中的鼠标移动事件
+ * 
+ * 根据鼠标移动距离调整相应面板的宽度。
+ * 使用 requestAnimationFrame 优化渲染性能。
+ * 
+ * @param {MouseEvent} e - 鼠标事件对象
+ */
 function handleMouseMove(e) {
     if (!isResizing) return;
     
@@ -993,6 +1122,11 @@ function handleMouseMove(e) {
     });
 }
 
+/**
+ * 处理面板拖拽结束事件
+ * 
+ * 清理拖拽状态，保存新的面板宽度到 localStorage。
+ */
 function handleMouseUp() {
     if (isResizing) {
         isResizing = false;
@@ -1115,6 +1249,14 @@ document.querySelector('.calculator-buttons').addEventListener('click', function
     btn.style.animation = 'pulse 0.3s ease';
 });
 
+/**
+ * 处理计算器数字输入
+ * 
+ * @param {string} num - 输入的数字字符
+ * 
+ * 如果是运算后的第一个输入，则替换当前显示值；
+ * 否则追加到当前显示值末尾（除非当前是0）。
+ */
 function handleNumber(num) {
     if (shouldResetDisplay) {
         currentValue = num;
@@ -1125,6 +1267,20 @@ function handleNumber(num) {
     updateDisplay();
 }
 
+/**
+ * 处理计算器操作按钮点击
+ * 
+ * @param {string} action - 操作类型，可选值：
+ *   - 'clear': 清除所有
+ *   - 'backspace': 删除最后一位
+ *   - 'percent': 百分比转换
+ *   - 'decimal': 小数点
+ *   - 'add': 加法
+ *   - 'subtract': 减法
+ *   - 'multiply': 乘法
+ *   - 'divide': 除法
+ *   - 'equals': 等号
+ */
 function handleAction(action) {
     switch (action) {
         case 'clear':
@@ -1165,6 +1321,12 @@ function handleAction(action) {
     updateDisplay();
 }
 
+/**
+ * 执行计算器计算
+ * 
+ * 根据保存的运算符对前一个值和当前值进行计算。
+ * 如果除数为0，则返回 'Error'。
+ */
 function calculate() {
     const prev = parseFloat(previousValue);
     const current = parseFloat(currentValue);
@@ -1189,6 +1351,11 @@ function calculate() {
     shouldResetDisplay = true;
 }
 
+/**
+ * 更新计算器显示
+ * 
+ * 将当前值显示在计算器的显示屏上。
+ */
 function updateDisplay() {
     calcDisplay.value = currentValue;
 }
@@ -1207,6 +1374,12 @@ let lastX = 0;
 let lastY = 0;
 
 // 设置画布大小
+/**
+ * 调整画布大小以适应容器
+ * 
+ * 根据父容器的大小计算画布的最佳尺寸，并设置白色背景。
+ * 画布高度最小为200px。
+ */
 function resizeCanvas() {
     const container = canvas.parentElement;
     const toolbarHeight = document.querySelector('.canvas-toolbar').offsetHeight;
@@ -1245,11 +1418,26 @@ brushSize.addEventListener('input', function() {
 });
 
 // 绘图函数 (优化版 - 使用 requestAnimationFrame)
+/**
+ * 开始绘制
+ * 
+ * 当鼠标或触摸按下时，记录起始坐标并设置绘制状态。
+ * 
+ * @param {MouseEvent|TouchEvent} e - 鼠标或触摸事件对象
+ */
 function startDrawing(e) {
     isDrawing = true;
     [lastX, lastY] = getCoordinates(e);
 }
 
+/**
+ * 绘制线条
+ * 
+ * 在画布上从上一个点到当前点绘制线条。
+ * 使用 requestAnimationFrame 优化渲染性能。
+ * 
+ * @param {MouseEvent|TouchEvent} e - 鼠标或触摸事件对象
+ */
 function draw(e) {
     if (!isDrawing) return;
     
@@ -1269,10 +1457,21 @@ function draw(e) {
     });
 }
 
+/**
+ * 停止绘制
+ * 
+ * 当鼠标或触摸释放时，清除绘制状态。
+ */
 function stopDrawing() {
     isDrawing = false;
 }
 
+/**
+ * 获取鼠标或触摸相对于画布的坐标
+ * 
+ * @param {MouseEvent|TouchEvent} e - 鼠标或触摸事件对象
+ * @returns {number[]} [x, y] 坐标数组
+ */
 function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
     if (e.touches) {
@@ -1331,6 +1530,12 @@ const clockElements = {
 
 let lastUpdateTime = '';
 
+/**
+ * 更新时钟显示
+ * 
+ * 更新本地数字时钟、日期显示以及所有世界时钟。
+ * 使用缓存优化性能，只在秒数变化时更新。
+ */
 function updateClock() {
     const now = new Date();
     
@@ -1374,6 +1579,14 @@ function updateClock() {
     updateWorldClock(clockElements.worldClocks.tokyo, 9);
 }
 
+/**
+ * 更新世界时钟显示
+ * 
+ * 根据时区偏移量计算并显示指定城市的时间。
+ * 
+ * @param {HTMLElement} element - 要更新的显示元素
+ * @param {number} offset - UTC时区偏移量（小时），如北京为+8，纽约为-5
+ */
 function updateWorldClock(element, offset) {
     if (!element) return;
     
@@ -1387,6 +1600,12 @@ function updateWorldClock(element, offset) {
 }
 
 // 每秒更新时钟 (优化版 - 使用 requestAnimationFrame)
+/**
+ * 启动时钟
+ * 
+ * 开始时钟更新循环，每秒更新一次显示。
+ * 使用 requestAnimationFrame 和 setTimeout 实现精确的每秒更新。
+ */
 function startClock() {
     updateClock();
     requestAnimationFrame(function tick() {
@@ -1411,10 +1630,21 @@ const debouncedSaveTodos = debounce(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
 }, 300);
 
+/**
+ * 保存待办事项到 localStorage
+ * 
+ * 使用防抖函数减少频繁的 localStorage 写入。
+ */
 function saveTodos() {
     debouncedSaveTodos();
 }
 
+/**
+ * 渲染待办事项列表
+ * 
+ * 根据当前 todos 数组渲染待办事项列表。
+ * 使用 DocumentFragment 批量添加，优化DOM操作性能。
+ */
 function renderTodos() {
     todoList.innerHTML = '';
     
@@ -1449,11 +1679,22 @@ function renderTodos() {
     updateTodoCount();
 }
 
+/**
+ * 更新待办事项计数
+ * 
+ * 计算未完成的待办事项数量并更新显示。
+ */
 function updateTodoCount() {
     const activeTodos = todos.filter(t => !t.completed).length;
     todoCount.textContent = `${activeTodos} 个待完成`;
 }
 
+/**
+ * 添加新的待办事项
+ * 
+ * 从输入框获取文本，创建新的待办事项并添加到列表顶部。
+ * 清空输入框并触发重新渲染。
+ */
 function addTodo() {
     const text = todoInput.value.trim();
     if (text) {
@@ -1596,10 +1837,22 @@ const debouncedSaveNotes = debounce(() => {
     localStorage.setItem('notes', JSON.stringify(notes));
 }, 300);
 
+/**
+ * 保存便签到 localStorage
+ * 
+ * 使用防抖函数减少频繁的 localStorage 写入。
+ */
 function saveNotes() {
     debouncedSaveNotes();
 }
 
+/**
+ * 渲染便签列表
+ * 
+ * 根据当前 notes 数组渲染便签卡片。
+ * 便签使用 fixed 定位显示在页面上的任意位置，支持拖拽移动。
+ * 使用 ResizeObserver 监听便签大小变化并自动保存。
+ */
 function renderNotes() {
     // 清空功能区的便签显示
     notesContainer.innerHTML = '';
@@ -1627,8 +1880,8 @@ function renderNotes() {
         return;
     }
     
-    // 优化：使用防抖处理ResizeObserver的保存操作
-    const debouncedSaveNotes = debounce(() => {
+    // 优化：使用防抖处理ResizeObserver的保存操作（独立的防抖函数）
+    const debouncedSaveNotesResize = debounce(() => {
         saveNotes();
     }, 500);
     
@@ -1644,7 +1897,7 @@ function renderNotes() {
                     height: entry.contentRect.height
                 };
                 // 优化：使用防抖保存，减少频繁的localStorage写入
-                debouncedSaveNotes();
+                debouncedSaveNotesResize();
             }
         }
     });
@@ -1710,6 +1963,12 @@ function renderNotes() {
 
 
 
+/**
+ * 添加新便签
+ * 
+ * 在功能区容器的左上角创建一个新的空便签。
+ * 自动聚焦到新便签的文本输入框。
+ */
 function addNote() {
     // 获取功能区容器的位置
     const containerRect = notesContainer.getBoundingClientRect();
@@ -1742,6 +2001,12 @@ function addNote() {
 addNoteBtn.addEventListener('click', addNote);
 
 // 使便签可拖拽
+/**
+ * 使便签可拖拽
+ * 
+ * 为每个便签卡片的头部添加鼠标拖拽事件监听器，
+ * 允许用户在页面上自由移动便签位置。
+ */
 function makeNotesDraggable() {
     const noteCards = document.querySelectorAll('.note-card');
     
@@ -1863,6 +2128,15 @@ if (colorPalette) {
     });
 }
 
+/**
+ * 将 HEX 颜色转换为 RGB 格式
+ * 
+ * @param {string} hex - HEX 格式的颜色值，如 '#ff0000' 或 'ff0000'
+ * @returns {Object|null} RGB 对象 {r, g, b} 或 null（如果格式无效）
+ * 
+ * @example
+ * hexToRgb('#ff0000') // {r: 255, g: 0, b: 0}
+ */
 function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -1872,6 +2146,17 @@ function hexToRgb(hex) {
     } : null;
 }
 
+/**
+ * 将 RGB 颜色转换为 HSL 格式
+ * 
+ * @param {number} r - 红色分量 (0-255)
+ * @param {number} g - 绿色分量 (0-255)
+ * @param {number} b - 蓝色分量 (0-255)
+ * @returns {Object} HSL 对象 {h, s, l}，其中 h 为角度(0-360)，s 和 l 为百分比(0-100)
+ * 
+ * @example
+ * rgbToHsl(255, 0, 0) // {h: 0, s: 100, l: 50}
+ */
 function rgbToHsl(r, g, b) {
     r /= 255;
     g /= 255;
@@ -1899,6 +2184,14 @@ function rgbToHsl(r, g, b) {
     };
 }
 
+/**
+ * 更新颜色转换器的所有输入框显示
+ * 
+ * 根据 HEX 颜色值计算并更新 RGB 和 HSL 显示。
+ * 
+ * @param {string} hex - HEX 格式的颜色值
+ * @param {boolean} updateHexInput - 是否更新 HEX 输入框的值
+ */
 function updateColorInputs(hex, updateHexInput = true) {
     const rgb = hexToRgb(hex);
     if (rgb) {
@@ -1960,9 +2253,18 @@ updateColorInputs('#000000');
 // 键盘快捷键支持（工具切换）
 // 已合并到统一的键盘事件处理器中（见代码末尾）
 
-// Toast提示功能
+/**
+ * 显示 Toast 提示消息
+ * 
+ * 在页面右上角显示一个临时的提示消息，自动在指定时间后消失。
+ * 如果已有提示消息存在，则先移除旧的提示。
+ * 
+ * @param {string} message - 要显示的消息内容
+ * @param {number} duration - 显示持续时间（毫秒），默认为 3000ms
+ */
 function showToast(message, duration = 3000) {
     const existingToast = document.querySelector('.toast');
+
     if (existingToast) {
         existingToast.remove();
     }
@@ -2014,6 +2316,11 @@ const copyQuoteBtn = document.getElementById('copy-quote');
 
 let savedFileCount = parseInt(localStorage.getItem('savedFileCount')) || 0;
 
+/**
+ * 显示随机名言
+ * 
+ * 从名言数组中随机选择一条名言并显示，带有淡入淡出动画效果。
+ */
 function displayRandomQuote() {
     quoteText.classList.add('loading');
     
@@ -2107,6 +2414,14 @@ settingsDarkMode.addEventListener('click', function() {
 });
 
 // 更新统计数据
+/**
+ * 更新统计数据
+ * 
+ * 更新设置面板中的统计信息，包括：
+ * - 待完成待办事项数量
+ * - 便签数量
+ * - 已保存文件数量
+ */
 function updateStats() {
     statTodos.textContent = todos.filter(t => !t.completed).length;
     statNotes.textContent = notes.length;
@@ -2232,6 +2547,11 @@ converterTabs.forEach(tab => {
     });
 });
 
+/**
+ * 更新单位转换器的下拉选项
+ * 
+ * 根据当前选择的转换类型（长度、重量、温度）更新单位选择器的内容。
+ */
 function updateConverterOptions() {
     if (currentConverterType === 'length') {
         converterFrom.innerHTML = '<option value="m">米</option><option value="km">千米</option><option value="cm">厘米</option><option value="mm">毫米</option><option value="ft">英尺</option><option value="in">英寸</option>';
@@ -2245,6 +2565,14 @@ function updateConverterOptions() {
     }
 }
 
+/**
+ * 温度单位转换
+ * 
+ * @param {number} value - 要转换的温度值
+ * @param {string} from - 源单位 ('celsius' | 'fahrenheit' | 'kelvin')
+ * @param {string} to - 目标单位 ('celsius' | 'fahrenheit' | 'kelvin')
+ * @returns {number} 转换后的温度值
+ */
 function convertTemperature(value, from, to) {
     if (from === to) return value;
     let celsius;
@@ -2257,6 +2585,11 @@ function convertTemperature(value, from, to) {
     else if (to === 'kelvin') return celsius + 273.15;
 }
 
+/**
+ * 执行单位转换
+ * 
+ * 根据当前选择的转换类型和单位，计算转换结果并显示。
+ */
 function convert() {
     const value = parseFloat(converterInput.value);
     if (isNaN(value)) {

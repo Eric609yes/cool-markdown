@@ -201,18 +201,23 @@
                     </svg>
                 </button>
             </div>
-            <div class="search-bar" id="search-bar" style="display: none;">
+            <!-- 搜索栏 -->
+            <div class="search-bar" id="search-bar" style="display: none;" role="search" aria-label="搜索与替换">
                 <div class="search-inputs-wrapper">
-                    <input type="text" id="search-input" placeholder="搜索..." class="search-input">
-                    <input type="text" id="replace-input" placeholder="替换..." class="search-input">
+                    <input type="text" id="search-input" placeholder="搜索..." class="search-input" aria-label="搜索内容" autocomplete="off">
+                    <input type="text" id="replace-input" placeholder="替换..." class="search-input" aria-label="替换内容" autocomplete="off">
                 </div>
-                <div class="search-controls">
-                    <button class="search-nav-btn" id="search-prev" title="上一个">↑</button>
-                    <span id="search-count" class="search-count">0/0</span>
-                    <button class="search-nav-btn" id="search-next" title="下一个">↓</button>
-                    <button class="search-action-btn" id="replace-btn" title="替换当前">替换</button>
-                    <button class="search-action-btn" id="replace-all-btn" title="替换全部">全部</button>
-                    <button class="search-close-btn" id="search-close" title="关闭">×</button>
+                <div class="search-controls" role="group" aria-label="搜索控制">
+                    <button class="search-nav-btn" id="search-prev" title="上一个" aria-label="上一个匹配">
+                        <span aria-hidden="true">↑</span>
+                    </button>
+                    <span id="search-count" class="search-count" aria-live="polite" aria-atomic="true">0/0</span>
+                    <button class="search-nav-btn" id="search-next" title="下一个" aria-label="下一个匹配">
+                        <span aria-hidden="true">↓</span>
+                    </button>
+                    <button class="search-action-btn" id="replace-btn" title="替换当前" aria-label="替换当前匹配">替换</button>
+                    <button class="search-action-btn" id="replace-all-btn" title="替换全部" aria-label="替换全部匹配">全部</button>
+                    <button class="search-close-btn" id="search-close" title="关闭" aria-label="关闭搜索栏">×</button>
                 </div>
             </div>
             <div class="editor-status">
@@ -313,9 +318,9 @@ Q. 时间戳  - 时间戳转换
                 </div>
             </div>
             <!-- 工具选择器: 切换不同的工具面板 -->
-            <div class="tool-selector">
-                <button class="tool-btn active tooltip" data-tool="calculator" data-tooltip="计算器 (1)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <nav class="tool-selector" role="tablist" aria-label="工具选择器">
+                <button class="tool-btn active tooltip" data-tool="calculator" data-tooltip="计算器 (1)" role="tab" aria-selected="true" aria-controls="calculator" aria-label="计算器 (快捷键: 1)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="4" y="2" width="16" height="20" rx="2"/>
                         <line x1="8" y1="6" x2="16" y2="6"/>
                         <line x1="16" y1="14" x2="16" y2="14"/>
@@ -329,58 +334,58 @@ Q. 时间戳  - 时间戳转换
                         <line x1="12" y1="18" x2="12" y2="18"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="canvas" data-tooltip="画板 (2)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="canvas" data-tooltip="画板 (2)" role="tab" aria-selected="false" aria-controls="canvas" aria-label="画板 (快捷键: 2)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 19l7-7 3 3-7 7-3-3z"/>
                         <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
                         <path d="M2 2l7.586 7.586"/>
                         <circle cx="11" cy="11" r="2"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="clock" data-tooltip="时钟 (3)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="clock" data-tooltip="时钟 (3)" role="tab" aria-selected="false" aria-controls="clock" aria-label="时钟 (快捷键: 3)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="todo" data-tooltip="待办 (4)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="todo" data-tooltip="待办 (4)" role="tab" aria-selected="false" aria-controls="todo" aria-label="待办事项 (快捷键: 4)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M9 11l3 3L22 4"/>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="notes" data-tooltip="便签 (5)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="notes" data-tooltip="便签 (5)" role="tab" aria-selected="false" aria-controls="notes" aria-label="便签 (快捷键: 5)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="color" data-tooltip="颜色 (6)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="color" data-tooltip="颜色 (6)" role="tab" aria-selected="false" aria-controls="color" aria-label="颜色转换 (快捷键: 6)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
                         <path d="M2 12h20"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="quote" data-tooltip="一言 (7)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="quote" data-tooltip="一言 (7)" role="tab" aria-selected="false" aria-controls="quote" aria-label="一言 (快捷键: 7)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="converter" data-tooltip="单位转换 (8)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="converter" data-tooltip="单位转换 (8)" role="tab" aria-selected="false" aria-controls="converter" aria-label="单位转换 (快捷键: 8)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/>
                         <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.35"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="password" data-tooltip="密码生成 (9)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="password" data-tooltip="密码生成 (9)" role="tab" aria-selected="false" aria-controls="password" aria-label="密码生成 (快捷键: 9)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="text-analyzer" data-tooltip="文本分析 (0)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="text-analyzer" data-tooltip="文本分析 (0)" role="tab" aria-selected="false" aria-controls="text-analyzer" aria-label="文本分析 (快捷键: 0)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
                         <line x1="16" y1="13" x2="8" y2="13"/>
@@ -388,120 +393,120 @@ Q. 时间戳  - 时间戳转换
                         <line x1="10" y1="9" x2="8" y2="9"/>
                     </svg>
                 </button>
-                <button class="tool-btn tooltip" data-tool="timestamp" data-tooltip="时间戳 (Q)">
-                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="tool-btn tooltip" data-tool="timestamp" data-tooltip="时间戳 (Q)" role="tab" aria-selected="false" aria-controls="timestamp" aria-label="时间戳转换 (快捷键: Q)">
+                    <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                         <path d="M16 14l-4-2"/>
                     </svg>
                 </button>
-            </div>
-            <div class="tool-content">
+            </nav>
+            <div class="tool-content" role="tabpanel">
                 <!-- 计算器 -->
-                <div id="calculator" class="tool-panel active">
+                <div id="calculator" class="tool-panel active" role="region" aria-label="计算器">
                     <div class="calculator-display">
-                        <input type="text" id="calc-display" readonly value="0">
+                        <input type="text" id="calc-display" readonly value="0" aria-label="计算器显示屏" aria-live="polite">
                     </div>
-                    <div class="calculator-buttons">
-                        <button class="calc-btn" data-action="clear">C</button>
-                        <button class="calc-btn" data-action="backspace">←</button>
-                        <button class="calc-btn" data-action="percent">%</button>
-                        <button class="calc-btn operator" data-action="divide">÷</button>
-                        <button class="calc-btn" data-value="7">7</button>
-                        <button class="calc-btn" data-value="8">8</button>
-                        <button class="calc-btn" data-value="9">9</button>
-                        <button class="calc-btn operator" data-action="multiply">×</button>
-                        <button class="calc-btn" data-value="4">4</button>
-                        <button class="calc-btn" data-value="5">5</button>
-                        <button class="calc-btn" data-value="6">6</button>
-                        <button class="calc-btn operator" data-action="subtract">−</button>
-                        <button class="calc-btn" data-value="1">1</button>
-                        <button class="calc-btn" data-value="2">2</button>
-                        <button class="calc-btn" data-value="3">3</button>
-                        <button class="calc-btn operator" data-action="add">+</button>
-                        <button class="calc-btn zero" data-value="0">0</button>
-                        <button class="calc-btn" data-action="decimal">.</button>
-                        <button class="calc-btn equals" data-action="equals">=</button>
+                    <div class="calculator-buttons" role="group" aria-label="计算器按键">
+                        <button class="calc-btn" data-action="clear" aria-label="清除">C</button>
+                        <button class="calc-btn" data-action="backspace" aria-label="退格">←</button>
+                        <button class="calc-btn" data-action="percent" aria-label="百分比">%</button>
+                        <button class="calc-btn operator" data-action="divide" aria-label="除">÷</button>
+                        <button class="calc-btn" data-value="7" aria-label="数字7">7</button>
+                        <button class="calc-btn" data-value="8" aria-label="数字8">8</button>
+                        <button class="calc-btn" data-value="9" aria-label="数字9">9</button>
+                        <button class="calc-btn operator" data-action="multiply" aria-label="乘">×</button>
+                        <button class="calc-btn" data-value="4" aria-label="数字4">4</button>
+                        <button class="calc-btn" data-value="5" aria-label="数字5">5</button>
+                        <button class="calc-btn" data-value="6" aria-label="数字6">6</button>
+                        <button class="calc-btn operator" data-action="subtract" aria-label="减">−</button>
+                        <button class="calc-btn" data-value="1" aria-label="数字1">1</button>
+                        <button class="calc-btn" data-value="2" aria-label="数字2">2</button>
+                        <button class="calc-btn" data-value="3" aria-label="数字3">3</button>
+                        <button class="calc-btn operator" data-action="add" aria-label="加">+</button>
+                        <button class="calc-btn zero" data-value="0" aria-label="数字0">0</button>
+                        <button class="calc-btn" data-action="decimal" aria-label="小数点">.</button>
+                        <button class="calc-btn equals" data-action="equals" aria-label="等于">=</button>
                     </div>
                 </div>
 
                 <!-- 画板 -->
-                <div id="canvas" class="tool-panel">
+                <div id="canvas" class="tool-panel" role="region" aria-label="画板">
                     <div class="canvas-toolbar">
                         <div class="color-picker">
-                            <label>颜色:</label>
-                            <input type="color" id="brush-color" value="#000000">
+                            <label for="brush-color">颜色:</label>
+                            <input type="color" id="brush-color" value="#000000" aria-label="画笔颜色选择">
                         </div>
                         <div class="brush-size">
-                            <label>画笔大小:</label>
-                            <input type="range" id="brush-size" min="1" max="20" value="3">
-                            <span id="brush-size-value">3</span>
+                            <label for="brush-size">画笔大小:</label>
+                            <input type="range" id="brush-size" min="1" max="20" value="3" aria-label="画笔大小调整" aria-valuemin="1" aria-valuemax="20" aria-valuenow="3">
+                            <span id="brush-size-value" aria-live="polite">3</span>
                         </div>
                         <div class="canvas-actions">
-                            <button id="clear-canvas" class="action-btn">清空</button>
-                            <button id="save-canvas" class="action-btn">保存PNG</button>
+                            <button id="clear-canvas" class="action-btn" aria-label="清空画板">清空</button>
+                            <button id="save-canvas" class="action-btn" aria-label="保存画板为PNG图片">保存PNG</button>
                         </div>
                     </div>
-                    <canvas id="drawing-canvas"></canvas>
+                    <canvas id="drawing-canvas" aria-label="绘图画布" role="img"></canvas>
                 </div>
 
                 <!-- 时钟 -->
-                <div id="clock" class="tool-panel">
+                <div id="clock" class="tool-panel" role="region" aria-label="时钟">
                     <div class="clock-display">
-                        <div id="digital-clock" class="digital-clock">00:00:00</div>
-                        <div id="date-display" class="date-display">2024-01-01</div>
+                        <div id="digital-clock" class="digital-clock" aria-live="polite" aria-label="本地时间">00:00:00</div>
+                        <div id="date-display" class="date-display" aria-label="当前日期">2024-01-01</div>
                     </div>
-                    <div class="world-clocks">
-                        <div class="world-clock-item">
+                    <div class="world-clocks" role="list" aria-label="世界时钟">
+                        <div class="world-clock-item" role="listitem">
                             <span class="timezone-name">北京</span>
-                            <span id="clock-beijing" class="timezone-time">00:00:00</span>
+                            <span id="clock-beijing" class="timezone-time" aria-live="polite" aria-label="北京时间">00:00:00</span>
                         </div>
-                        <div class="world-clock-item">
+                        <div class="world-clock-item" role="listitem">
                             <span class="timezone-name">纽约</span>
-                            <span id="clock-newyork" class="timezone-time">00:00:00</span>
+                            <span id="clock-newyork" class="timezone-time" aria-live="polite" aria-label="纽约时间">00:00:00</span>
                         </div>
-                        <div class="world-clock-item">
+                        <div class="world-clock-item" role="listitem">
                             <span class="timezone-name">伦敦</span>
-                            <span id="clock-london" class="timezone-time">00:00:00</span>
+                            <span id="clock-london" class="timezone-time" aria-live="polite" aria-label="伦敦时间">00:00:00</span>
                         </div>
-                        <div class="world-clock-item">
+                        <div class="world-clock-item" role="listitem">
                             <span class="timezone-name">东京</span>
-                            <span id="clock-tokyo" class="timezone-time">00:00:00</span>
+                            <span id="clock-tokyo" class="timezone-time" aria-live="polite" aria-label="东京时间">00:00:00</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- 待办事项 -->
-                <div id="todo" class="tool-panel">
+                <div id="todo" class="tool-panel" role="region" aria-label="待办事项">
                     <div class="todo-input-container">
-                        <input type="text" id="todo-input" placeholder="添加新任务...">
-                        <button id="add-todo-btn" class="action-btn">添加</button>
+                        <input type="text" id="todo-input" placeholder="添加新任务..." aria-label="新任务输入框">
+                        <button id="add-todo-btn" class="action-btn" aria-label="添加任务">添加</button>
                     </div>
-                    <div id="todo-list" class="todo-list">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📋</div>
+                    <div id="todo-list" class="todo-list" role="list" aria-live="polite" aria-label="待办事项列表">
+                        <div class="empty-state" role="status">
+                            <div class="empty-state-icon" aria-hidden="true">📋</div>
                             <div class="empty-state-text">暂无任务</div>
                             <div class="empty-state-hint">在上方输入框添加新任务</div>
                         </div>
                     </div>
                     <div class="todo-stats">
-                        <span id="todo-count">0 个任务</span>
-                        <div class="todo-actions">
-                            <button id="export-todos-btn" class="clear-btn">导出</button>
-                            <button id="clear-completed-btn" class="clear-btn">清除已完成</button>
+                        <span id="todo-count" aria-live="polite">0 个任务</span>
+                        <div class="todo-actions" role="group" aria-label="待办操作">
+                            <button id="export-todos-btn" class="clear-btn" aria-label="导出待办事项">导出</button>
+                            <button id="clear-completed-btn" class="clear-btn" aria-label="清除已完成的任务">清除已完成</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 便签 -->
-                <div id="notes" class="tool-panel">
+                <div id="notes" class="tool-panel" role="region" aria-label="便签">
                     <div class="notes-toolbar">
-                        <button id="add-note-btn" class="action-btn">新建便签</button>
-                        <button id="clear-notes-btn" class="action-btn">清空全部</button>
+                        <button id="add-note-btn" class="action-btn" aria-label="创建新便签">新建便签</button>
+                        <button id="clear-notes-btn" class="action-btn" aria-label="清空所有便签">清空全部</button>
                     </div>
-                    <div id="notes-container" class="notes-container">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
+                    <div id="notes-container" class="notes-container" role="list" aria-live="polite" aria-label="便签列表">
+                        <div class="empty-state" role="status">
+                            <div class="empty-state-icon" aria-hidden="true">📝</div>
                             <div class="empty-state-text">暂无便签</div>
                             <div class="empty-state-hint">点击"新建便签"开始记录</div>
                         </div>
@@ -509,64 +514,67 @@ Q. 时间戳  - 时间戳转换
                 </div>
 
                 <!-- 颜色转换器 -->
-                <div id="color" class="tool-panel">
+                <div id="color" class="tool-panel" role="region" aria-label="颜色转换器">
                     <div class="color-converter">
                         <div class="color-preview">
-                            <input type="color" id="color-picker" value="#000000">
-                            <div id="color-preview-box" class="color-preview-box"></div>
+                            <label for="color-picker" class="visually-hidden">选择颜色</label>
+                            <input type="color" id="color-picker" value="#000000" aria-label="颜色选择器">
+                            <div id="color-preview-box" class="color-preview-box" aria-hidden="true" role="img" aria-label="颜色预览"></div>
                         </div>
                         <div class="color-inputs">
                             <div class="color-input-group">
-                                <label>HEX:</label>
-                                <input type="text" id="color-hex" value="#000000">
+                                <label for="color-hex">HEX:</label>
+                                <input type="text" id="color-hex" value="#000000" aria-label="十六进制颜色值" pattern="#[0-9A-Fa-f]{6}">
                             </div>
                             <div class="color-input-group">
-                                <label>RGB:</label>
-                                <input type="text" id="color-rgb" value="rgb(0, 0, 0)">
+                                <label for="color-rgb">RGB:</label>
+                                <input type="text" id="color-rgb" value="rgb(0, 0, 0)" aria-label="RGB颜色值" readonly>
                             </div>
                             <div class="color-input-group">
-                                <label>HSL:</label>
-                                <input type="text" id="color-hsl" value="hsl(0, 0%, 0%)">
+                                <label for="color-hsl">HSL:</label>
+                                <input type="text" id="color-hsl" value="hsl(0, 0%, 0%)" aria-label="HSL颜色值" readonly>
                             </div>
                         </div>
-                        <div class="color-palette">
-                            <div class="color-preset" data-color="#000000"></div>
-                            <div class="color-preset" data-color="#FFFFFF"></div>
-                            <div class="color-preset" data-color="#FF0000"></div>
-                            <div class="color-preset" data-color="#00FF00"></div>
-                            <div class="color-preset" data-color="#0000FF"></div>
-                            <div class="color-preset" data-color="#FFFF00"></div>
-                            <div class="color-preset" data-color="#FF00FF"></div>
-                            <div class="color-preset" data-color="#00FFFF"></div>
-                            <div class="color-preset" data-color="#FFA500"></div>
-                            <div class="color-preset" data-color="#800080"></div>
+                        <div class="color-palette" role="list" aria-label="预设颜色">
+                            <button class="color-preset" data-color="#000000" aria-label="黑色" role="listitem"></button>
+                            <button class="color-preset" data-color="#FFFFFF" aria-label="白色" role="listitem"></button>
+                            <button class="color-preset" data-color="#FF0000" aria-label="红色" role="listitem"></button>
+                            <button class="color-preset" data-color="#00FF00" aria-label="绿色" role="listitem"></button>
+                            <button class="color-preset" data-color="#0000FF" aria-label="蓝色" role="listitem"></button>
+                            <button class="color-preset" data-color="#FFFF00" aria-label="黄色" role="listitem"></button>
+                            <button class="color-preset" data-color="#FF00FF" aria-label="品红" role="listitem"></button>
+                            <button class="color-preset" data-color="#00FFFF" aria-label="青色" role="listitem"></button>
+                            <button class="color-preset" data-color="#FFA500" aria-label="橙色" role="listitem"></button>
+                            <button class="color-preset" data-color="#800080" aria-label="紫色" role="listitem"></button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 一言 -->
-                <div id="quote" class="tool-panel">
+                <div id="quote" class="tool-panel" role="region" aria-label="一言">
                     <div class="quote-container">
-                        <div id="quote-text" class="quote-text">生活不是等待风暴过去，而是学会在雨中翩翩起舞。</div>
-                        <div id="quote-author" class="quote-author">维维安·格林</div>
+                        <blockquote id="quote-text" class="quote-text" aria-live="polite">生活不是等待风暴过去，而是学会在雨中翩翩起舞。</blockquote>
+                        <div id="quote-author" class="quote-author" aria-label="名言作者">维维安·格林</div>
                     </div>
                     <div class="quote-actions">
-                        <button id="refresh-quote" class="refresh-quote-btn">获取新一言</button>
-                        <button id="copy-quote" class="copy-quote-btn">复制</button>
+                        <button id="refresh-quote" class="refresh-quote-btn" aria-label="获取新一言">获取新一言</button>
+                        <button id="copy-quote" class="copy-quote-btn" aria-label="复制名言">复制</button>
                     </div>
                 </div>
 
                 <!-- 单位转换器 -->
-                <div id="converter" class="tool-panel">
-                    <div class="converter-tabs">
-                        <button class="converter-tab active" data-type="length">长度</button>
-                        <button class="converter-tab" data-type="weight">重量</button>
-                        <button class="converter-tab" data-type="temperature">温度</button>
+                <div id="converter" class="tool-panel" role="region" aria-label="单位转换器">
+                    <div class="converter-tabs" role="tablist" aria-label="转换类型选择">
+                        <button class="converter-tab active" data-type="length" role="tab" aria-selected="true" aria-controls="converter-content">长度</button>
+                        <button class="converter-tab" data-type="weight" role="tab" aria-selected="false" aria-controls="converter-content">重量</button>
+                        <button class="converter-tab" data-type="temperature" role="tab" aria-selected="false" aria-controls="converter-content">温度</button>
                     </div>
-                    <div class="converter-content">
+                    <div id="converter-content" class="converter-content" role="tabpanel">
                         <div class="converter-input-group">
-                            <input type="number" id="converter-input" placeholder="输入数值" class="converter-input">
-                            <select id="converter-from" class="converter-select">
+                            <label for="converter-input" class="visually-hidden">输入数值</label>
+                            <input type="number" id="converter-input" placeholder="输入数值" class="converter-input" aria-label="输入要转换的数值">
+                            <label for="converter-from" class="visually-hidden">选择源单位</label>
+                            <select id="converter-from" class="converter-select" aria-label="选择源单位">
                                 <option value="m">米</option>
                                 <option value="km">千米</option>
                                 <option value="cm">厘米</option>
@@ -575,10 +583,12 @@ Q. 时间戳  - 时间戳转换
                                 <option value="in">英寸</option>
                             </select>
                         </div>
-                        <div class="converter-arrow">↓</div>
+                        <div class="converter-arrow" aria-hidden="true">↓</div>
                         <div class="converter-input-group">
-                            <input type="number" id="converter-output" readonly class="converter-output">
-                            <select id="converter-to" class="converter-select">
+                            <label for="converter-output" class="visually-hidden">转换结果</label>
+                            <input type="number" id="converter-output" readonly class="converter-output" aria-label="转换结果" aria-live="polite">
+                            <label for="converter-to" class="visually-hidden">选择目标单位</label>
+                            <select id="converter-to" class="converter-select" aria-label="选择目标单位">
                                 <option value="m">米</option>
                                 <option value="km">千米</option>
                                 <option value="cm">厘米</option>
@@ -591,16 +601,18 @@ Q. 时间戳  - 时间戳转换
                 </div>
 
                 <!-- 密码生成器 -->
-                <div id="password" class="tool-panel">
+                <div id="password" class="tool-panel" role="region" aria-label="密码生成器">
                     <div class="password-generator">
                         <div class="password-display">
-                            <input type="text" id="password-output" readonly class="password-output" placeholder="点击生成密码">
-                            <button id="copy-password" class="copy-password-btn">复制</button>
+                            <label for="password-output" class="visually-hidden">生成的密码</label>
+                            <input type="text" id="password-output" readonly class="password-output" placeholder="点击生成密码" aria-label="生成的密码" aria-live="polite">
+                            <button id="copy-password" class="copy-password-btn" aria-label="复制密码">复制</button>
                         </div>
-                        <div class="password-options">
+                        <fieldset class="password-options">
+                            <legend class="visually-hidden">密码选项</legend>
                             <div class="password-option">
-                                <label>长度: <span id="password-length-value">12</span></label>
-                                <input type="range" id="password-length" min="6" max="32" value="12">
+                                <label for="password-length">长度: <span id="password-length-value" aria-live="polite">12</span></label>
+                                <input type="range" id="password-length" min="6" max="32" value="12" aria-label="密码长度" aria-valuemin="6" aria-valuemax="32" aria-valuenow="12">
                             </div>
                             <div class="password-option">
                                 <label>
@@ -626,16 +638,17 @@ Q. 时间戳  - 时间戳转换
                                     特殊字符
                                 </label>
                             </div>
-                        </div>
-                        <button id="generate-password" class="generate-password-btn">生成密码</button>
+                        </fieldset>
+                        <button id="generate-password" class="generate-password-btn" aria-label="生成新密码">生成密码</button>
                     </div>
                 </div>
 
                 <!-- 文本分析工具 -->
-                <div id="text-analyzer" class="tool-panel">
+                <div id="text-analyzer" class="tool-panel" role="region" aria-label="文本分析工具">
                     <div class="text-analyzer">
-                        <textarea id="text-analyzer-input" class="text-analyzer-input" placeholder="在此输入文本进行分析..."></textarea>
-                        <div class="text-analyzer-stats">
+                        <label for="text-analyzer-input" class="visually-hidden">输入要分析的文本</label>
+                        <textarea id="text-analyzer-input" class="text-analyzer-input" placeholder="在此输入文本进行分析..." aria-label="文本输入区域"></textarea>
+                        <div class="text-analyzer-stats" role="region" aria-live="polite" aria-label="统计结果">
                             <div class="stat-item">
                                 <span class="stat-label">字符数</span>
                                 <span class="stat-value" id="stat-chars">0</span>
@@ -654,39 +667,41 @@ Q. 时间戳  - 时间戳转换
                             </div>
                         </div>
                         <div class="text-analyzer-actions">
-                            <button id="clear-text-analyzer" class="action-btn">清空</button>
-                            <button id="copy-text-stats" class="action-btn">复制统计</button>
+                            <button id="clear-text-analyzer" class="action-btn" aria-label="清空文本">清空</button>
+                            <button id="copy-text-stats" class="action-btn" aria-label="复制统计结果">复制统计</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 时间戳转换器 -->
-                <div id="timestamp" class="tool-panel">
+                <div id="timestamp" class="tool-panel" role="region" aria-label="时间戳转换器">
                     <div class="timestamp-converter">
-                        <div class="timestamp-section">
-                            <h4>时间戳转日期</h4>
+                        <section class="timestamp-section" aria-labelledby="timestamp-to-date-heading">
+                            <h4 id="timestamp-to-date-heading">时间戳转日期</h4>
                             <div class="timestamp-input-group">
-                                <input type="number" id="timestamp-input" placeholder="输入时间戳（秒或毫秒）" class="timestamp-input">
-                                <button id="convert-timestamp" class="action-btn">转换</button>
+                                <label for="timestamp-input" class="visually-hidden">输入时间戳</label>
+                                <input type="number" id="timestamp-input" placeholder="输入时间戳（秒或毫秒）" class="timestamp-input" aria-label="输入时间戳（秒或毫秒）">
+                                <button id="convert-timestamp" class="action-btn" aria-label="将时间戳转换为日期">转换</button>
                             </div>
-                            <div class="timestamp-result">
+                            <div class="timestamp-result" role="status" aria-live="polite">
                                 <span id="timestamp-result">等待转换...</span>
                             </div>
-                        </div>
-                        <div class="timestamp-divider"></div>
-                        <div class="timestamp-section">
-                            <h4>日期转时间戳</h4>
+                        </section>
+                        <div class="timestamp-divider" role="separator" aria-hidden="true"></div>
+                        <section class="timestamp-section" aria-labelledby="date-to-timestamp-heading">
+                            <h4 id="date-to-timestamp-heading">日期转时间戳</h4>
                             <div class="timestamp-input-group">
-                                <input type="datetime-local" id="date-input" class="date-input">
-                                <button id="convert-date" class="action-btn">转换</button>
+                                <label for="date-input" class="visually-hidden">选择日期和时间</label>
+                                <input type="datetime-local" id="date-input" class="date-input" aria-label="选择日期和时间">
+                                <button id="convert-date" class="action-btn" aria-label="将日期转换为时间戳">转换</button>
                             </div>
-                            <div class="timestamp-result">
+                            <div class="timestamp-result" role="status" aria-live="polite">
                                 <span id="date-result">等待转换...</span>
                             </div>
-                        </div>
+                        </section>
                         <div class="timestamp-current">
-                            <button id="current-timestamp" class="action-btn">获取当前时间戳</button>
-                            <span id="current-timestamp-result"></span>
+                            <button id="current-timestamp" class="action-btn" aria-label="获取当前时间戳">获取当前时间戳</button>
+                            <span id="current-timestamp-result" aria-live="polite"></span>
                         </div>
                     </div>
                 </div>
