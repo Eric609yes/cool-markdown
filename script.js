@@ -1816,14 +1816,11 @@ colorHex.addEventListener('blur', function() {
     }
 });
 
+// 初始化颜色预设背景色
+const colorPresets = document.querySelectorAll('.color-preset');
 colorPresets.forEach(preset => {
-    // 设置预设颜色的背景色
     const color = preset.dataset.color;
     preset.style.backgroundColor = color;
-    
-    preset.addEventListener('click', function() {
-        updateColorInputs(color);
-    });
 });
 
 // 初始化颜色
