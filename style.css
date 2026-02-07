@@ -872,27 +872,27 @@ body.dark-mode .theme-icon {
     }
 }
 
-/* 面板淡入动画 */
+/* 面板淡入动画 - 优化使用 transform3d */
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translate3d(0, 20px, 0);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
-/* 工具面板切换动画 */
+/* 工具面板切换动画 - 优化使用 transform3d */
 @keyframes fadeInScale {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translate3d(0, 0, 0) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
     }
 }
 
@@ -971,6 +971,8 @@ body.dark-mode .theme-icon {
     transition: background 0.3s ease;
     flex-shrink: 0;
     position: relative;
+    /* 性能优化：使用 will-change 提示浏览器优化动画 */
+    will-change: transform, opacity;
 }
 
 .panel::after {
@@ -1044,8 +1046,20 @@ body.dark-mode .theme-icon {
     transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     position: relative;
     overflow: hidden;
+    /* 性能优化：使用 will-change 和 translate3d 触发硬件加速 */
     will-change: transform, box-shadow;
     transform: translateZ(0);
+}
+
+.save-btn:hover {
+    background: var(--gradient-4);
+    transform: translate3d(0, -2px, 0);
+    box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.save-btn:active {
+    transform: translate3d(0, 0, 0) scale(0.98);
+    box-shadow: 0 2px 6px var(--shadow-color);
 }
 
 .save-btn:hover {

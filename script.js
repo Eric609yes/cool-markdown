@@ -104,6 +104,47 @@ marked.setOptions({
 const autoSaveInterval = 3000; // 3秒自动保存
 const autoSaveStatus = document.getElementById('auto-save-status');
 
+// 批量存储缓冲区，减少 localStorage I/O 次数
+let pendingSaveData = {};
+let saveTimeout = null;
+
+/**
+ * 批量保存数据到 localStorage
+ * 
+ * 将所有待保存的数据一次性写入 localStorage，减少 I/O 操作次数。
+ */
+function flushSaveData() {
+    if (Object.keys(pendingSaveData).length === 0) return;
+    
+    try {
+        // 使用批量写入减少 I/O
+        Object.entries(pendingSaveData).forEach(([key, value]) => {
+            localStorage.setItem(key, value);
+        });
+        pendingSaveData = {};
+        showAutoSaveStatus('saved');
+    } catch (e) {
+        console.error('保存失败:', e);
+    }
+}
+
+/**
+ * 添加待保存数据到缓冲区
+ * 
+ * @param {string} key - 存储键
+ * @param {string} value - 存储值
+ */
+function queueSaveData(key, value) {
+    pendingSaveData[key] = value;
+    
+    // 重置定时器
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+    
+    saveTimeout = setTimeout(flushSaveData, autoSaveInterval);
+}
+
 /**
  * 保存编辑器内容到 localStorage
  * 
@@ -111,9 +152,8 @@ const autoSaveStatus = document.getElementById('auto-save-status');
  * 实现数据的持久化存储，防止意外刷新丢失内容。
  */
 function saveToLocalStorage() {
-    localStorage.setItem('editorContent', editor.value);
-    localStorage.setItem('editorLastSave', Date.now());
-    showAutoSaveStatus('saved');
+    queueSaveData('editorContent', editor.value);
+    queueSaveData('editorLastSave', String(Date.now()));
 }
 
 /**
@@ -147,6 +187,11 @@ const debouncedSave = debounce(() => {
 }, autoSaveInterval);
 
 editor.addEventListener('input', debouncedSave);
+
+// 页面卸载前确保所有数据已保存
+window.addEventListener('beforeunload', () => {
+    flushSaveData();
+});
 
 // 从localStorage加载保存的内容
 /**
@@ -645,13 +690,38 @@ themeToggle.addEventListener('click', function() {
 });
 
 // 监听编辑器输入，实时更新预览
-// 优化：使用节流处理Markdown解析，减少频繁的DOM更新
+// 优化：使用更高效的节流处理Markdown解析，减少频繁的DOM更新
+// 使用缓存机制避免重复解析相同内容
+let lastMarkdownContent = '';
+let cachedPreviewHTML = '';
+
 const throttledUpdatePreview = throttle(function() {
     const markdown = editor.value;
-    preview.innerHTML = marked.parse(markdown);
-    // 更新行列号
-    updateLineColumnInfo();
-}, 150);
+    
+    // 缓存优化：如果内容未变化，不重新解析
+    if (markdown === lastMarkdownContent && cachedPreviewHTML) {
+        return;
+    }
+    
+    lastMarkdownContent = markdown;
+    
+    // 使用 requestAnimationFrame 优化渲染时机
+    requestAnimationFrame(() => {
+        try {
+            cachedPreviewHTML = marked.parse(markdown);
+            // 使用 DocumentFragment 减少重排
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cachedPreviewHTML;
+            preview.innerHTML = '';
+            preview.appendChild(tempDiv.firstChild);
+        } catch (e) {
+            console.error('Markdown解析错误:', e);
+        }
+        
+        // 更新行列号
+        updateLineColumnInfo();
+    });
+}, 200);
 
 editor.addEventListener('input', throttledUpdatePreview);
 
@@ -686,13 +756,17 @@ function updateLineColumnInfo() {
 // ========================================
 // 快速编辑功能
 // ========================================
-const quickBtns = document.querySelectorAll('.quick-btn');
+// 优化：使用事件委托代替为每个按钮单独添加监听器
+const quickEditToolbar = document.querySelector('.quick-edit-toolbar');
 
-quickBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const action = this.dataset.action;
+quickEditToolbar.addEventListener('click', function(e) {
+    const btn = e.target.closest('.quick-btn');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    if (action) {
         insertMarkdown(action);
-    });
+    }
 });
 
 /**
@@ -1158,7 +1232,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 // 工具切换功能
 // ========================================
-const toolBtns = document.querySelectorAll('.tool-btn');
+// 优化：使用事件委托优化工具切换性能
+const toolSelector = document.querySelector('.tool-selector');
 const toolPanels = document.querySelectorAll('.tool-panel');
 
 // 设置按钮点击事件 - 切换到设置面板
@@ -1170,7 +1245,7 @@ if (settingsToggle) {
         });
         
         // 取消所有工具按钮的激活状态
-        toolBtns.forEach(btn => {
+        document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         
@@ -1182,40 +1257,45 @@ if (settingsToggle) {
     });
 }
 
-toolBtns.forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        // 添加涟漪效果
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
+// 使用事件委托处理工具切换
+toolSelector.addEventListener('click', function(e) {
+    const btn = e.target.closest('.tool-btn');
+    if (!btn) return;
+    
+    // 添加涟漪效果
+    const ripple = document.createElement('span');
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
 
-        ripple.style.cssText = `
-            position: absolute;
-            width: ${size}px;
-            height: ${size}px;
-            left: ${x}px;
-            top: ${y}px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s ease-out;
-            pointer-events: none;
-        `;
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
+    `;
 
-        this.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
 
-        // 移除所有活动状态
-        toolBtns.forEach(b => b.classList.remove('active'));
-        toolPanels.forEach(p => p.classList.remove('active'));
+    // 移除所有活动状态
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    toolPanels.forEach(p => p.classList.remove('active'));
 
-        // 添加当前活动状态
-        this.classList.add('active');
-        const toolId = this.getAttribute('data-tool');
-        document.getElementById(toolId).classList.add('active');
-    });
+    // 添加当前活动状态
+    btn.classList.add('active');
+    const toolId = btn.getAttribute('data-tool');
+    const toolPanel = document.getElementById(toolId);
+    if (toolPanel) {
+        toolPanel.classList.add('active');
+    }
 });
 
 // ========================================
@@ -1373,12 +1453,23 @@ let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 
+// 离屏 Canvas 缓冲区，优化绘图性能
+let offscreenCanvas = null;
+let offscreenCtx = null;
+
+// 初始化离屏 Canvas
+function initOffscreenCanvas() {
+    offscreenCanvas = document.createElement('canvas');
+    offscreenCtx = offscreenCanvas.getContext('2d');
+}
+
 // 设置画布大小
 /**
  * 调整画布大小以适应容器
  * 
  * 根据父容器的大小计算画布的最佳尺寸，并设置白色背景。
  * 画布高度最小为200px。
+ * 使用离屏 Canvas 缓存现有内容，避免调整大小时丢失。
  */
 function resizeCanvas() {
     const container = canvas.parentElement;
@@ -1389,35 +1480,60 @@ function resizeCanvas() {
     // 计算可用高度
     const availableHeight = containerHeight - toolbarHeight - padding;
     
+    // 保存现有内容
+    let existingImageData = null;
+    if (canvas.width > 0 && canvas.height > 0) {
+        existingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+    
     // 设置画布尺寸
-    canvas.width = container.clientWidth - padding;
-    canvas.height = Math.max(availableHeight, 200);
+    const newWidth = container.clientWidth - padding;
+    const newHeight = Math.max(availableHeight, 200);
+    canvas.width = newWidth;
+    canvas.height = newHeight;
     
     // 设置白色背景
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 恢复现有内容
+    if (existingImageData) {
+        ctx.putImageData(existingImageData, 0, 0);
+    }
+    
+    // 初始化离屏 Canvas
+    if (!offscreenCanvas) {
+        initOffscreenCanvas();
+    }
+    offscreenCanvas.width = newWidth;
+    offscreenCanvas.height = newHeight;
 }
 
 // 初始化画布
+initOffscreenCanvas();
 resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+
+// 防抖优化 resize 事件
+const debouncedResizeCanvas = debounce(resizeCanvas, 100);
+window.addEventListener('resize', debouncedResizeCanvas);
 
 // 当切换到画板时重新调整大小
-toolBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const toolId = this.getAttribute('data-tool');
-        if (toolId === 'canvas') {
+const toolSelectorCanvas = document.querySelector('.tool-selector');
+if (toolSelectorCanvas) {
+    toolSelectorCanvas.addEventListener('click', function(e) {
+        const btn = e.target.closest('.tool-btn');
+        if (btn && btn.getAttribute('data-tool') === 'canvas') {
             setTimeout(resizeCanvas, 100);
         }
     });
-});
+}
 
 // 更新画笔大小显示
 brushSize.addEventListener('input', function() {
     brushSizeValue.textContent = this.value;
 });
 
-// 绘图函数 (优化版 - 使用 requestAnimationFrame)
+// 绘图函数 (优化版 - 使用离屏 Canvas 和 requestAnimationFrame)
 /**
  * 开始绘制
  * 
@@ -1430,31 +1546,68 @@ function startDrawing(e) {
     [lastX, lastY] = getCoordinates(e);
 }
 
+// 绘制请求队列，优化性能
+let drawRequests = [];
+let isProcessingDraw = false;
+
+/**
+ * 处理绘制队列
+ */
+function processDrawQueue() {
+    if (drawRequests.length === 0) {
+        isProcessingDraw = false;
+        return;
+    }
+    
+    isProcessingDraw = true;
+    const request = drawRequests.shift();
+    
+    const [x, y] = request.coordinates;
+    
+    // 在离屏 Canvas 上绘制
+    offscreenCtx.beginPath();
+    offscreenCtx.moveTo(lastX, lastY);
+    offscreenCtx.lineTo(x, y);
+    offscreenCtx.strokeStyle = brushColor.value;
+    offscreenCtx.lineWidth = brushSize.value;
+    offscreenCtx.lineCap = 'round';
+    offscreenCtx.lineJoin = 'round';
+    offscreenCtx.stroke();
+    
+    // 同步到主 Canvas
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = brushColor.value;
+    ctx.lineWidth = brushSize.value;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    
+    [lastX, lastY] = [x, y];
+    
+    requestAnimationFrame(processDrawQueue);
+}
+
 /**
  * 绘制线条
  * 
  * 在画布上从上一个点到当前点绘制线条。
- * 使用 requestAnimationFrame 优化渲染性能。
+ * 使用离屏 Canvas 和请求队列优化渲染性能。
  * 
  * @param {MouseEvent|TouchEvent} e - 鼠标或触摸事件对象
  */
 function draw(e) {
     if (!isDrawing) return;
     
-    requestAnimationFrame(() => {
-        const [x, y] = getCoordinates(e);
-        
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = brushColor.value;
-        ctx.lineWidth = brushSize.value;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-        
-        [lastX, lastY] = [x, y];
-    });
+    const coordinates = getCoordinates(e);
+    
+    // 添加到绘制队列
+    drawRequests.push({ coordinates });
+    
+    if (!isProcessingDraw) {
+        processDrawQueue();
+    }
 }
 
 /**
@@ -1464,6 +1617,7 @@ function draw(e) {
  */
 function stopDrawing() {
     isDrawing = false;
+    drawRequests = [];
 }
 
 /**
@@ -1642,40 +1796,65 @@ function saveTodos() {
 /**
  * 渲染待办事项列表
  * 
- * 根据当前 todos 数组渲染待办事项列表。
- * 使用 DocumentFragment 批量添加，优化DOM操作性能。
+ * 将 todos 数组渲染到页面上，包括复选框状态和删除按钮。
+ * 优化：使用 DocumentFragment 减少重排，批量更新 DOM。
  */
 function renderTodos() {
-    todoList.innerHTML = '';
+    const todoList = document.getElementById('todo-list');
     
-    if (todos.length === 0) {
-        todoList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <div class="empty-state-text">暂无任务</div>
-                <div class="empty-state-hint">在上方输入框添加新任务</div>
-            </div>
-        `;
-        updateTodoCount();
-        return;
-    }
-    
-    // 优化：使用DocumentFragment批量添加待办事项，减少DOM重排
+    // 使用 DocumentFragment 优化 DOM 操作
     const fragment = document.createDocumentFragment();
     
-    todos.forEach((todo, index) => {
-        const todoItem = document.createElement('div');
-        todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-        todoItem.innerHTML = `
-            <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} data-index="${index}">
-            <span class="todo-text">${todo.text}</span>
-            <button class="todo-delete" data-index="${index}">×</button>
+    if (todos.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.setAttribute('role', 'status');
+        emptyState.innerHTML = `
+            <div class="empty-state-icon" aria-hidden="true">📋</div>
+            <div class="empty-state-text">暂无任务</div>
+            <div class="empty-state-hint">在上方输入框添加新任务</div>
         `;
-        fragment.appendChild(todoItem);
-    });
+        fragment.appendChild(emptyState);
+    } else {
+        todos.forEach((todo, index) => {
+            const todoItem = document.createElement('div');
+            todoItem.className = 'todo-item';
+            if (todo.completed) {
+                todoItem.classList.add('completed');
+            }
+            
+            // 使用 createElement 代替 innerHTML 减少解析开销
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.dataset.id = todo.id;
+            checkbox.checked = todo.completed;
+            checkbox.setAttribute('aria-label', '标记任务完成状态');
+            
+            const textSpan = document.createElement('span');
+            textSpan.className = 'todo-text';
+            textSpan.textContent = todo.text;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'todo-delete';
+            deleteBtn.dataset.id = todo.id;
+            deleteBtn.textContent = '✕';
+            deleteBtn.setAttribute('aria-label', '删除任务');
+            
+            todoItem.appendChild(checkbox);
+            todoItem.appendChild(textSpan);
+            todoItem.appendChild(deleteBtn);
+            
+            fragment.appendChild(todoItem);
+        });
+    }
     
-    // 一次性将所有待办事项添加到列表中
+    // 一次性替换所有内容，减少重排
+    while (todoList.firstChild) {
+        todoList.removeChild(todoList.firstChild);
+    }
     todoList.appendChild(fragment);
+    
     updateTodoCount();
 }
 
@@ -1849,115 +2028,75 @@ function saveNotes() {
 /**
  * 渲染便签列表
  * 
- * 根据当前 notes 数组渲染便签卡片。
- * 便签使用 fixed 定位显示在页面上的任意位置，支持拖拽移动。
- * 使用 ResizeObserver 监听便签大小变化并自动保存。
+ * 将 notes 数组渲染到页面上，支持拖拽定位。
+ * 优化：使用 DocumentFragment 减少重排，批量更新 DOM。
  */
 function renderNotes() {
-    // 清空功能区的便签显示
-    notesContainer.innerHTML = '';
+    const notesContainer = document.getElementById('notes-container');
     
-    // 移除所有body中的便签和断开ResizeObserver
-    const existingNotes = document.querySelectorAll('.note-card');
-    existingNotes.forEach(note => {
-        note.remove();
-    });
-    
-    // 断开之前的ResizeObserver
-    if (resizeObserver) {
-        resizeObserver.disconnect();
-        resizeObserver = null;
-    }
-    
-    if (notes.length === 0) {
-        notesContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <div class="empty-state-text">暂无便签</div>
-                <div class="empty-state-hint">点击"新建便签"开始记录</div>
-            </div>
-        `;
-        return;
-    }
-    
-    // 优化：使用防抖处理ResizeObserver的保存操作（独立的防抖函数）
-    const debouncedSaveNotesResize = debounce(() => {
-        saveNotes();
-    }, 500);
-    
-    // 创建新的ResizeObserver（单例模式）
-    resizeObserver = new ResizeObserver(entries => {
-        for (let entry of entries) {
-            const noteCard = entry.target;
-            const noteId = noteCard.dataset.id;
-            const note = notes.find(n => n.id == noteId);
-            if (note) {
-                note.size = {
-                    width: entry.contentRect.width,
-                    height: entry.contentRect.height
-                };
-                // 优化：使用防抖保存，减少频繁的localStorage写入
-                debouncedSaveNotesResize();
-            }
-        }
-    });
-    
-    // 获取功能区容器的位置信息（用于初始位置）
-    const containerRect = notesContainer.getBoundingClientRect();
-    
-    // 优化：使用DocumentFragment批量添加便签，减少DOM重排
+    // 使用 DocumentFragment 优化 DOM 操作
     const fragment = document.createDocumentFragment();
     
-    notes.forEach((note, index) => {
-        const noteCard = document.createElement('div');
-        noteCard.className = 'note-card';
-        noteCard.dataset.id = note.id;
-        
-        // 确保便签有大小信息
-        if (!note.size) {
-            note.size = { width: 200, height: 150 };
-            saveNotes();
-        }
-        
-        // 确保便签有位置信息
-        if (!note.position) {
-            // 初始位置在功能区内，每个便签向下偏移30px
-            note.position = {
-                x: containerRect.left + 20,
-                y: containerRect.top + 20 + (index * 30)
-            };
-            saveNotes();
-        }
-        
-        // 设置便签的位置和大小（使用fixed定位，全局可拖动）
-        noteCard.style.width = note.size.width + 'px';
-        noteCard.style.height = note.size.height + 'px';
-        noteCard.style.position = 'fixed';
-        noteCard.style.left = note.position.x + 'px';
-        noteCard.style.top = note.position.y + 'px';
-        noteCard.style.zIndex = 10000 + index;
-        
-        noteCard.innerHTML = `
-            <div class="note-header" title="拖拽移动">
-                <span class="note-drag-handle">⋮⋮</span>
-            </div>
-            <textarea class="note-textarea" data-id="${note.id}" placeholder="输入便签内容...">${note.text}</textarea>
-            <div class="note-actions">
-                <button class="note-delete" data-id="${note.id}" title="删除便签">×</button>
-            </div>
+    if (notes.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.setAttribute('role', 'status');
+        emptyState.innerHTML = `
+            <div class="empty-state-icon" aria-hidden="true">📝</div>
+            <div class="empty-state-text">暂无便签</div>
+            <div class="empty-state-hint">点击"新建便签"开始记录</div>
         `;
-        
-        // 将便签添加到fragment中
-        fragment.appendChild(noteCard);
-        
-        // 观察便签的大小变化
-        resizeObserver.observe(noteCard);
-    });
+        fragment.appendChild(emptyState);
+    } else {
+        notes.forEach(note => {
+            const noteCard = document.createElement('div');
+            noteCard.className = 'note-card';
+            noteCard.dataset.id = note.id;
+            
+            // 设置位置（如果有保存的位置）
+            if (note.position) {
+                noteCard.style.left = note.position.x + 'px';
+                noteCard.style.top = note.position.y + 'px';
+            }
+            
+            // 使用 createElement 代替 innerHTML 减少解析开销
+            const header = document.createElement('div');
+            header.className = 'note-header';
+            
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'note-title';
+            titleSpan.textContent = '便签';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'note-delete';
+            deleteBtn.dataset.id = note.id;
+            deleteBtn.textContent = '✕';
+            deleteBtn.setAttribute('aria-label', '删除便签');
+            
+            header.appendChild(titleSpan);
+            header.appendChild(deleteBtn);
+            
+            const textarea = document.createElement('textarea');
+            textarea.className = 'note-textarea';
+            textarea.dataset.id = note.id;
+            textarea.placeholder = '输入内容...';
+            textarea.setAttribute('aria-label', '便签内容');
+            textarea.textContent = note.text;
+            
+            noteCard.appendChild(header);
+            noteCard.appendChild(textarea);
+            
+            fragment.appendChild(noteCard);
+        });
+    }
     
-    // 一次性将所有便签添加到body中
-    document.body.appendChild(fragment);
+    // 一次性替换所有内容，减少重排
+    while (notesContainer.firstChild) {
+        notesContainer.removeChild(notesContainer.firstChild);
+    }
+    notesContainer.appendChild(fragment);
     
-    // 为便签添加拖拽功能
+    // 使便签可拖拽
     makeNotesDraggable();
 }
 
